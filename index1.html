@@ -6,6 +6,10 @@
     <title>nano Company</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+    <!-- Google Sign-In API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- reCAPTCHA API -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         * {
             margin: 0;
@@ -13,7 +17,6 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
-  
 
         :root {
             --primary-color: #000000;
@@ -47,81 +50,56 @@
             z-index: -1;
             overflow: hidden;
         }
-       .background-image {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('https://cdn.pixabay.com/photo/2019/09/16/11/39/neon-4480753__340.png') 
-        center/cover no-repeat;
-      filter: blur(8px) brightness(0.7);
-      transform: scale(1.1);
-      animation: hueRotate 15s infinite alternate;
-      z-index: -1; /* Keep behind text */
-    }
 
-    /* Text style */
-    .Lyrics {
-  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 80px;
-  font-weight: 600;
-  line-height: 1.1;
-  color: #fff;
-  letter-spacing: -0.03em;
-  text-rendering: optimizeLegibility;
-  padding: 40px 80px; /* add more space on the right edge */
-  text-align: right; /* align text to the right */
-  position: absolute;
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2019/09/16/11/39/neon-4480753__340.png') 
+                center/cover no-repeat;
+            filter: blur(8px) brightness(0.7);
+            transform: scale(1.1);
+            animation: hueRotate 15s infinite alternate;
+            z-index: -1;
+        }
+
+        .Lyrics {
+            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 80px;
+            font-weight: 600;
+            line-height: 1.1;
+            color: #fff;
+            letter-spacing: -0.03em;
+            text-rendering: optimizeLegibility;
+            padding: 40px 80px;
+            text-align: right;
+            position: absolute;
             right: 80px;
             top: 50%;
             transform: translateY(-50%);
-  z-index: 1; /* keep text above background */
-}
+            z-index: 1;
+        }
 
-    /* Add a slightly darker overlay for better contrast */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 0;
-    }
-
-    /* Hue animation */
-    @keyframes hueRotate {
-      from {
-        filter: blur(8px) brightness(0.7) hue-rotate(0deg);
-      }
-      to {
-        filter: blur(8px) brightness(0.7) hue-rotate(360deg);
-      }
-    }
-
-    
-
-    /* Hue rotation animation */
-    @keyframes hueRotate {
-      from {
-        filter: blur(8px) brightness(0.7) hue-rotate(0deg);
-      }
-      to {
-        filter: blur(8px) brightness(0.7) hue-rotate(360deg);
-      }
-    }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
 
         @keyframes hueRotate {
-            0% {
+            from {
                 filter: blur(8px) brightness(0.7) hue-rotate(0deg);
             }
-            100% {
+            to {
                 filter: blur(8px) brightness(0.7) hue-rotate(360deg);
             }
         }
-        
-        
         
         .signup-container {
             font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -162,8 +140,8 @@
             letter-spacing: -0.5px;
         }
         
-        .signup-header p 
-        {font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        .signup-header p {
+            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             opacity: 0.8;
             font-size: 15px;
             font-weight: 400;
@@ -241,8 +219,15 @@
             cursor: pointer;
         }
         
-        .verification-section 
-        {font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        /* reCAPTCHA Container */
+        .recaptcha-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .verification-section {
+            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: none;
             margin-top: 20px;
             padding: 20px;
@@ -482,6 +467,11 @@
             transition: width 0.3s, background-color 0.3s;
         }
         
+        .g-recaptcha {
+            transform: scale(0.9);
+            transform-origin: 0 0;
+        }
+        
         @media (max-width: 1024px) {
             .main-content {
                 flex-direction: column;
@@ -529,9 +519,8 @@
                 font-size: 2.5rem;
             }
             
-            .theme-selector {
-                top: 10px;
-                left: 10px;
+            .g-recaptcha {
+                transform: scale(0.8);
             }
         }
     </style>
@@ -549,109 +538,130 @@
 with <br>
 U <br></div>
 
-    
-    </div>
-        <div class="signup-container">
-            <div class="signup-header">
-                <h1>Create Account</h1>
-                <p>Join our community today</p>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Create Account</h1>
+            <p>Join our community today</p>
+        </div>
+        
+        <form class="signup-form" id="signupForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required>
+                    <div class="error-message" id="firstNameError">First name must be at least 4 characters and can contain hyphens</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required>
+                    <div class="error-message" id="lastNameError">Last name must be at least 4 characters and can contain hyphens</div>
+                </div>
             </div>
             
-            <form class="signup-form" id="signupForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required>
-                        <div class="error-message" id="firstNameError">First name must be at least 4 characters and can contain hyphens</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required>
-                        <div class="error-message" id="lastNameError">Last name must be at least 4 characters and can contain hyphens</div>
-                    </div>
+            <div class="form-group-full">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                <div class="error-message" id="emailError">Please enter a valid email address</div>
+            </div>
+            
+            <div class="form-group-full">
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" class="form-control" placeholder="Create a password (min 9 characters)" required>
+                    <button type="button" class="toggle-password" id="togglePassword">
+                        <i class="far fa-eye"></i>
+                    </button>
+                </div>
+                <div class="strength-meter">
+                    <div class="strength-meter-fill" id="strengthMeter"></div>
+                </div>
+                <div class="error-message" id="passwordError">Password must be at least 9 characters</div>
+            </div>
+            
+            <div class="form-group-full">
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="password-container">
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
+                    <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                        <i class="far fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+            
+            <!-- reCAPTCHA Section -->
+            <div class="recaptcha-container">
+                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+            </div>
+            <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
+            
+            <div class="terms-container">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
+            </div>
+            <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
+            
+            <button type="submit" class="signup-button" id="signupButton" disabled>Create Account</button>
+            
+            <!-- Email Verification Section -->
+            <div class="verification-section" id="verificationSection">
+                <h3>Email Verification</h3>
+                <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
+                
+                <div class="verification-code">
+                    <input type="text" maxlength="1" id="digit1" class="verification-digit">
+                    <input type="text" maxlength="1" id="digit2" class="verification-digit">
+                    <input type="text" maxlength="1" id="digit3" class="verification-digit">
+                    <input type="text" maxlength="1" id="digit4" class="verification-digit">
+                    <input type="text" maxlength="1" id="digit5" class="verification-digit">
+                    <input type="text" maxlength="1" id="digit6" class="verification-digit">
                 </div>
                 
-                <div class="form-group-full">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
-                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                <div class="error-message" id="verificationError">Invalid verification code</div>
+                <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
+                
+                <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
+                
+                <div class="resend-code">
+                    Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
                 </div>
-                
-                <div class="form-group-full">
-                    <label for="password">Password</label>
-                    <div class="password-container">
-                        <input type="password" id="password" class="form-control" placeholder="Create a password (min 9 characters)" required>
-                        <button type="button" class="toggle-password" id="togglePassword">
-                            <i class="far fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="strength-meter">
-                        <div class="strength-meter-fill" id="strengthMeter"></div>
-                    </div>
-                    <div class="error-message" id="passwordError">Password must be at least 9 characters</div>
-                </div>
-                
-                <div class="form-group-full">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-container">
-                        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
-                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
-                            <i class="far fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
-                </div>
-                
-                <div class="terms-container">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
-                </div>
-                <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
-                
-                <button type="submit" class="signup-button">Create Account</button>
-                
-                <!-- Email Verification Section -->
-                <div class="verification-section" id="verificationSection">
-                    <h3>Email Verification</h3>
-                    <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
-                    
-                    <div class="verification-code">
-                        <input type="text" maxlength="1" id="digit1" class="verification-digit">
-                        <input type="text" maxlength="1" id="digit2" class="verification-digit">
-                        <input type="text" maxlength="1" id="digit3" class="verification-digit">
-                        <input type="text" maxlength="1" id="digit4" class="verification-digit">
-                        <input type="text" maxlength="1" id="digit5" class="verification-digit">
-                        <input type="text" maxlength="1" id="digit6" class="verification-digit">
-                    </div>
-                    
-                    <div class="error-message" id="verificationError">Invalid verification code</div>
-                    <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
-                    
-                    <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
-                    
-                    <div class="resend-code">
-                        Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
-                    </div>
-                </div>
-                
-                <div class="divider">
-                    <span>Or sign up with</span>
-                </div>
-                
-                <button type="button" class="google-signup" id="googleSignup">
-                    <i class="fab fa-google google-icon"></i>
-                    Sign up with Google
-                </button>
-                
-                <div class="login-link">
-                    Already have an account? <a href="index.html">Sign in</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="divider">
+                <span>Or sign up with</span>
+            </div>
+            
+            <!-- Google Sign-In Button -->
+            <div id="g_id_onload"
+                 data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
+                 data-context="signup"
+                 data-ux_mode="popup"
+                 data-callback="handleGoogleSignIn"
+                 data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="filled_blue"
+                 data-text="signup_with"
+                 data-size="large"
+                 data-logo_alignment="left"
+                 data-width="400">
+            </div>
+            
+            <div class="login-link">
+                Already have an account? <a href="index.html">Sign in</a>
+            </div>
+        </form>
     </div>
 
     <script>
+        // reCAPTCHA test keys (for localhost testing)
+        // Site Key: 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+        // Secret Key: 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+        
         document.addEventListener('DOMContentLoaded', function() {
             const signupForm = document.getElementById('signupForm');
             const firstNameInput = document.getElementById('firstName');
@@ -662,14 +672,15 @@ U <br></div>
             const termsCheckbox = document.getElementById('terms');
             const togglePassword = document.getElementById('togglePassword');
             const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-            const googleSignup = document.getElementById('googleSignup');
             const strengthMeter = document.getElementById('strengthMeter');
             const verificationSection = document.getElementById('verificationSection');
             const verificationEmail = document.getElementById('verificationEmail');
             const verifyButton = document.getElementById('verifyButton');
             const resendCode = document.getElementById('resendCode');
             const verificationDigits = document.querySelectorAll('.verification-digit');
-            const themeButtons = document.querySelectorAll('.theme-btn');
+            const signupButton = document.getElementById('signupButton');
+            const termsLink = document.getElementById('termsLink');
+            const privacyLink = document.getElementById('privacyLink');
             
             const firstNameError = document.getElementById('firstNameError');
             const lastNameError = document.getElementById('lastNameError');
@@ -679,69 +690,76 @@ U <br></div>
             const termsError = document.getElementById('termsError');
             const verificationError = document.getElementById('verificationError');
             const verificationSuccess = document.getElementById('verificationSuccess');
+            const recaptchaError = document.getElementById('recaptchaError');
             
             let generatedCode = '';
-            
-            // Theme switching functionality
-            themeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const theme = this.getAttribute('data-theme');
-                    
-                    // Update active button
-                    themeButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Apply theme
-                    applyTheme(theme);
-                });
+            let isRecaptchaVerified = false;
+
+            // Terms and Privacy Policy Links
+            termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Terms of Service: Please replace this with your actual terms of service content.');
             });
             
-            
-            function applyTheme(theme) {
-                const root = document.documentElement;
+            privacyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Privacy Policy: Please replace this with your actual privacy policy content.');
+            });
+
+            // reCAPTCHA callback functions
+            window.onRecaptchaSuccess = function() {
+                isRecaptchaVerified = true;
+                recaptchaError.style.display = 'none';
+                signupButton.disabled = false;
+                console.log('reCAPTCHA verified successfully');
+            };
+
+            window.onRecaptchaExpired = function() {
+                isRecaptchaVerified = false;
+                signupButton.disabled = true;
+                console.log('reCAPTCHA expired');
+            };
+
+            // Google Sign-In callback
+            window.handleGoogleSignIn = function(response) {
+                console.log('Google Sign-In response:', response);
                 
-                switch(theme) {
-                    case 'black':
-                        root.style.setProperty('--primary-color', '#000000');
-                        root.style.setProperty('--secondary-color', '#ffffff');
-                        root.style.setProperty('--accent-color', '#4285F4');
-                        root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.1)');
-                        root.style.setProperty('--glass-border', 'rgba(255, 255, 255, 0.2)');
-                        root.style.setProperty('--text-color', '#ffffff');
-                        root.style.setProperty('--input-bg', 'rgba(255, 255, 255, 0.1)');
-                        root.style.setProperty('--input-text', '#ffffff');
-                        root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.3)');
-                        document.body.style.background = 'linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%)';
-                        break;
-                        
-                    case 'white':
-                        root.style.setProperty('--primary-color', '#ffffff');
-                        root.style.setProperty('--secondary-color', '#000000');
-                        root.style.setProperty('--accent-color', '#4285F4');
-                        root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.8)');
-                        root.style.setProperty('--glass-border', 'rgba(255, 255, 255, 0.5)');
-                        root.style.setProperty('--text-color', '#333333');
-                        root.style.setProperty('--input-bg', 'rgba(255, 255, 255, 0.7)');
-                        root.style.setProperty('--input-text', '#333333');
-                        root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.1)');
-                        document.body.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
-                        break;
-                        
-                    case 'blue':
-                        root.style.setProperty('--primary-color', '#2196F3');
-                        root.style.setProperty('--secondary-color', '#ffffff');
-                        root.style.setProperty('--accent-color', '#FF9800');
-                        root.style.setProperty('--glass-bg', 'rgba(33, 150, 243, 0.2)');
-                        root.style.setProperty('--glass-border', 'rgba(33, 150, 243, 0.3)');
-                        root.style.setProperty('--text-color', '#ffffff');
-                        root.style.setProperty('--input-bg', 'rgba(255, 255, 255, 0.15)');
-                        root.style.setProperty('--input-text', '#ffffff');
-                        root.style.setProperty('--shadow-color', 'rgba(33, 150, 243, 0.3)');
-                        document.body.style.background = 'linear-gradient(135deg, #2196F3 0%, #21CBF3 50%, #03A9F4 100%)';
-                        break;
+                // Decode the JWT token to get user info
+                const responsePayload = parseJwt(response.credential);
+                
+                console.log('User Info:', {
+                    name: responsePayload.name,
+                    email: responsePayload.email,
+                    picture: responsePayload.picture
+                });
+                
+                // Auto-fill the form with Google data
+                const nameParts = responsePayload.name.split(' ');
+                firstNameInput.value = nameParts[0] || '';
+                lastNameInput.value = nameParts.slice(1).join(' ') || '';
+                emailInput.value = responsePayload.email || '';
+                
+                // Show success message
+                alert(`Welcome ${responsePayload.name}! Your Google account has been connected. Please complete the form and reCAPTCHA.`);
+                
+                // You would typically send this data to your backend here
+                // sendToBackend(response.credential);
+            };
+
+            function parseJwt(token) {
+                try {
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    return JSON.parse(jsonPayload);
+                } catch (e) {
+                    console.error('Error parsing JWT:', e);
+                    return {};
                 }
             }
-            
+
             // Toggle password visibility
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -760,22 +778,13 @@ U <br></div>
                 const password = this.value;
                 let strength = 0;
                 
-                // Length check
                 if (password.length >= 9) strength += 25;
-                
-                // Contains lowercase
                 if (/[a-z]/.test(password)) strength += 25;
-                
-                // Contains uppercase
                 if (/[A-Z]/.test(password)) strength += 25;
-                
-                // Contains numbers
                 if (/[0-9]/.test(password)) strength += 25;
                 
-                // Update strength meter
                 strengthMeter.style.width = strength + '%';
                 
-                // Set color based on strength
                 if (strength < 50) {
                     strengthMeter.style.backgroundColor = '#d32f2f';
                 } else if (strength < 75) {
@@ -784,7 +793,6 @@ U <br></div>
                     strengthMeter.style.backgroundColor = '#4caf50';
                 }
                 
-                // Real-time validation
                 if (password.length >= 9) {
                     passwordError.style.display = 'none';
                     passwordInput.style.borderColor = 'var(--glass-border)';
@@ -817,7 +825,7 @@ U <br></div>
                 
                 let isValid = true;
                 
-                // First name validation (at least 4 characters, allows hyphen)
+                // First name validation
                 const firstName = firstNameInput.value.trim();
                 if (firstName.length < 4 || !/^[a-zA-Z\-]+$/.test(firstName)) {
                     firstNameError.style.display = 'block';
@@ -828,7 +836,7 @@ U <br></div>
                     firstNameInput.style.borderColor = 'var(--glass-border)';
                 }
                 
-                // Last name validation (at least 4 characters, allows hyphen)
+                // Last name validation
                 const lastName = lastNameInput.value.trim();
                 if (lastName.length < 4 || !/^[a-zA-Z\-]+$/.test(lastName)) {
                     lastNameError.style.display = 'block';
@@ -849,7 +857,7 @@ U <br></div>
                     emailInput.style.borderColor = 'var(--glass-border)';
                 }
                 
-                // Password validation (more than 8 characters = at least 9)
+                // Password validation
                 if (passwordInput.value.length < 9) {
                     passwordError.style.display = 'block';
                     passwordInput.style.borderColor = '#ff6b6b';
@@ -869,6 +877,14 @@ U <br></div>
                     confirmPasswordInput.style.borderColor = 'var(--glass-border)';
                 }
                 
+                // reCAPTCHA validation
+                if (!isRecaptchaVerified) {
+                    recaptchaError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    recaptchaError.style.display = 'none';
+                }
+                
                 // Terms validation
                 if (!termsCheckbox.checked) {
                     termsError.style.display = 'block';
@@ -879,28 +895,25 @@ U <br></div>
                 
                 // If form is valid, show verification section
                 if (isValid) {
-                    // Generate and "send" verification code
                     generatedCode = generateVerificationCode();
                     verificationEmail.textContent = emailInput.value;
                     verificationSection.style.display = 'block';
                     
                     // In a real app, you would send this code to the user's email
                     console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
+                    alert(`Verification code is ${generatedCode}`);
                     
-                    // Scroll to verification section
                     verificationSection.scrollIntoView({ behavior: 'smooth' });
                 }
             });
             
             // Verify email button
             verifyButton.addEventListener('click', function() {
-                // Get the entered code
                 let enteredCode = '';
                 verificationDigits.forEach(digit => {
                     enteredCode += digit.value;
                 });
                 
-                // Check if code matches
                 if (enteredCode === generatedCode) {
                     verificationError.style.display = 'none';
                     verificationSuccess.style.display = 'block';
@@ -908,10 +921,8 @@ U <br></div>
                     verifyButton.disabled = true;
                     verifyButton.style.backgroundColor = '#4caf50';
                     
-                    // In a real app, you would submit the form to the server here
                     setTimeout(function() {
                         alert('Account created and verified successfully!');
-                        // Reset form
                         signupForm.reset();
                         verificationSection.style.display = 'none';
                         verificationSuccess.style.display = 'none';
@@ -921,6 +932,10 @@ U <br></div>
                         verificationDigits.forEach(digit => {
                             digit.value = '';
                         });
+                        // Reset reCAPTCHA
+                        grecaptcha.reset();
+                        isRecaptchaVerified = false;
+                        signupButton.disabled = true;
                     }, 1500);
                 } else {
                     verificationError.style.display = 'block';
@@ -932,11 +947,10 @@ U <br></div>
             resendCode.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Generate new code
                 generatedCode = generateVerificationCode();
                 console.log(`New verification code for ${emailInput.value}: ${generatedCode}`);
+                alert(`Demo: New verification code is ${generatedCode}`);
                 
-                // Reset verification inputs
                 verificationDigits.forEach(digit => {
                     digit.value = '';
                 });
@@ -945,25 +959,11 @@ U <br></div>
                 verificationError.style.display = 'none';
                 verificationSuccess.style.display = 'none';
                 
-                // Show temporary message
                 const originalText = resendCode.textContent;
                 resendCode.textContent = 'Code sent!';
                 setTimeout(() => {
                     resendCode.textContent = originalText;
                 }, 2000);
-            });
-            
-            // Google signup button
-            googleSignup.addEventListener('click', function() {
-                // Simulate Google signup process
-                this.innerHTML = '<i class="fab fa-google google-icon"></i> Connecting...';
-                this.disabled = true;
-                
-                setTimeout(function() {
-                    alert('Google authentication would open here. (This is a demo)');
-                    googleSignup.innerHTML = '<i class="fab fa-google google-icon"></i> Sign up with Google';
-                    googleSignup.disabled = false;
-                }, 1500);
             });
             
             // Real-time validation
@@ -1009,8 +1009,6 @@ U <br></div>
                 return re.test(email);
             }
         });
-
     </script>
 </body>
-
 </html>
