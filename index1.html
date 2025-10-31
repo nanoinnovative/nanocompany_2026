@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>nano Company</title>
+    <title>nano Company - Sign Up</title>
+    <meta name="description" content="Join nano Company - Create your account today">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Google Sign-In API -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- reCAPTCHA API -->
@@ -15,7 +16,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         }
 
         :root {
@@ -28,6 +29,8 @@
             --input-bg: rgba(255, 255, 255, 0.1);
             --input-text: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.3);
+            --error-color: #ff6b6b;
+            --success-color: #4caf50;
         }
         
         body {
@@ -39,6 +42,7 @@
             color: var(--text-color);
             overflow-x: hidden;
             transition: background 0.5s ease;
+            padding: 20px;
         }
         
         .background-container {
@@ -65,23 +69,6 @@
             z-index: -1;
         }
 
-        .Lyrics {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 80px;
-            font-weight: 600;
-            line-height: 1.1;
-            color: #fff;
-            letter-spacing: -0.03em;
-            text-rendering: optimizeLegibility;
-            padding: 40px 80px;
-            text-align: right;
-            position: absolute;
-            right: 80px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-
         .overlay {
             position: fixed;
             top: 0;
@@ -101,8 +88,40 @@
             }
         }
         
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-section {
+            flex: 1;
+            padding: 20px;
+            max-width: 500px;
+        }
+        
+        .hero-title {
+            font-size: 80px;
+            font-weight: 600;
+            line-height: 1.1;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+            text-rendering: optimizeLegibility;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
         .signup-container {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: var(--glass-bg);
             border-radius: 20px;
             box-shadow: 0 8px 32px var(--shadow-color);
@@ -112,10 +131,6 @@
             animation: fadeIn 0.6s ease-out;
             backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            position: absolute;
-            left: 80px;
-            top: 50%;
-            transform: translateY(-50%);
         }
         
         @keyframes fadeIn {
@@ -124,7 +139,6 @@
         }
         
         .signup-header {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: rgba(0, 0, 0, 0.4);
             color: white;
             padding: 35px 30px;
@@ -133,7 +147,6 @@
         }
         
         .signup-header h1 {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 28px;
             font-weight: 600;
             margin-bottom: 8px;
@@ -141,37 +154,31 @@
         }
         
         .signup-header p {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             opacity: 0.8;
             font-size: 15px;
             font-weight: 400;
         }
         
         .signup-form {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             padding: 35px 30px;
         }
         
         .form-row {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex;
             gap: 15px;
             margin-bottom: 22px;
         }
         
         .form-group {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             flex: 1;
             margin-bottom: 0;
         }
         
         .form-group-full {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             margin-bottom: 22px;
         }
         
         .form-group label {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: block;
             margin-bottom: 10px;
             font-weight: 500;
@@ -180,7 +187,6 @@
         }
         
         .form-control {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             width: 100%;
             padding: 15px 18px;
             border: 1.5px solid var(--glass-border);
@@ -202,13 +208,19 @@
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         }
         
+        .form-control.error {
+            border-color: var(--error-color);
+        }
+        
+        .form-control.success {
+            border-color: var(--success-color);
+        }
+        
         .password-container {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             position: relative;
         }
         
         .toggle-password {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             position: absolute;
             right: 15px;
             top: 50%;
@@ -217,6 +229,7 @@
             border: none;
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
+            padding: 5px;
         }
         
         /* reCAPTCHA Container */
@@ -227,7 +240,6 @@
         }
         
         .verification-section {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: none;
             margin-top: 20px;
             padding: 20px;
@@ -237,14 +249,12 @@
         }
         
         .verification-code {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex;
             gap: 10px;
             margin-top: 10px;
         }
         
         .verification-code input {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             width: 50px;
             height: 50px;
             text-align: center;
@@ -257,13 +267,11 @@
         }
         
         .verification-code input:focus {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             border-color: rgba(255, 255, 255, 0.5);
             outline: none;
         }
         
         .resend-code {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             margin-top: 15px;
             text-align: center;
             font-size: 14px;
@@ -271,52 +279,44 @@
         }
         
         .resend-code a {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: var(--text-color);
             text-decoration: none;
             font-weight: 500;
         }
         
         .resend-code a:hover {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-decoration: underline;
         }
         
         .terms-container {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex;
             align-items: flex-start;
             margin-bottom: 25px;
         }
         
         .terms-container input {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             margin-right: 12px;
             margin-top: 3px;
             accent-color: var(--accent-color);
         }
         
         .terms-container label {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.8);
             line-height: 1.5;
         }
         
         .terms-container a {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: var(--text-color);
             text-decoration: none;
             font-weight: 500;
         }
         
         .terms-container a:hover {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-decoration: underline;
         }
         
         .signup-button {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
@@ -332,18 +332,21 @@
         }
         
         .signup-button:hover {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
         }
         
         .signup-button:active {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             transform: translateY(0);
         }
         
+        .signup-button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .verify-button {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
@@ -362,8 +365,16 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
+        .verify-button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+        }
+        
+        .verify-button.success {
+            background: var(--success-color);
+        }
+        
         .divider {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex;
             align-items: center;
             text-align: center;
@@ -374,19 +385,16 @@
         
         .divider::before,
         .divider::after {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             content: '';
             flex: 1;
             border-bottom: 1px solid var(--glass-border);
         }
         
         .divider span {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             padding: 0 15px;
         }
         
         .google-signup {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -405,7 +413,6 @@
         }
         
         .google-signup:hover {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
@@ -416,14 +423,12 @@
         }
         
         .login-link {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-align: center;
             color: rgba(255, 255, 255, 0.7);
             font-size: 15px;
         }
         
         .login-link a {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: var(--text-color);
             text-decoration: none;
             font-weight: 600;
@@ -431,28 +436,24 @@
         }
         
         .login-link a:hover {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-decoration: underline;
         }
         
         .error-message {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            color: #ff6b6b;
+            color: var(--error-color);
             font-size: 14px;
             margin-top: 5px;
             display: none;
         }
         
         .success-message {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            color: #4caf50;
+            color: var(--success-color);
             font-size: 14px;
             margin-top: 5px;
             display: none;
         }
         
         .strength-meter {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             height: 5px;
             border-radius: 3px;
             margin-top: 8px;
@@ -461,7 +462,6 @@
         }
         
         .strength-meter-fill {
-            font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             height: 100%;
             width: 0%;
             transition: width 0.3s, background-color 0.3s;
@@ -472,8 +472,26 @@
             transform-origin: 0 0;
         }
         
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .main-content {
+            .main-container {
                 flex-direction: column;
                 gap: 2rem;
             }
@@ -483,14 +501,18 @@
                 max-width: 100%;
             }
             
-            .title {
+            .hero-title {
                 font-size: 3rem;
             }
         }
         
-        @media (max-width: 480px) {
-            .signup-container {
-                max-width: 100%;
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
             }
             
             .signup-form {
@@ -505,6 +527,20 @@
             .form-group {
                 margin-bottom: 22px;
             }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .signup-container {
+                max-width: 100%;
+            }
             
             .verification-code {
                 gap: 5px;
@@ -513,10 +549,6 @@
             .verification-code input {
                 width: 40px;
                 height: 40px;
-            }
-            
-            .title {
-                font-size: 2.5rem;
             }
             
             .g-recaptcha {
@@ -528,133 +560,133 @@
 <body>
     <div class="background-image"></div>
     <div class="overlay"></div>
-    <div class="Lyrics">Get Ready with<br> 
-        nano <br>
-        Company<br>
-        ----------------------
-        <br>
-        The world is almost  <br>
-    done <br>
-with <br>
-U <br></div>
-
-    <div class="signup-container">
-        <div class="signup-header">
-            <h1>Create Account</h1>
-            <p>Join our community today</p>
+    
+    <div class="main-container">
+        <div class="hero-section">
+            <h1 class="hero-title">Get Ready with<br>nano Company</h1>
+            <p class="hero-subtitle">The world is almost done with U</p>
         </div>
         
-        <form class="signup-form" id="signupForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required>
-                    <div class="error-message" id="firstNameError">First name must be at least 4 characters and can contain hyphens</div>
+        <div class="signup-container">
+            <div class="signup-header">
+                <h1>Create Account</h1>
+                <p>Join our community today</p>
+            </div>
+            
+            <form class="signup-form" id="signupForm" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required>
+                        <div class="error-message" id="firstNameError">First name must be at least 2 characters and can contain letters, hyphens, and spaces</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required>
+                        <div class="error-message" id="lastNameError">Last name must be at least 2 characters and can contain letters, hyphens, and spaces</div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required>
-                    <div class="error-message" id="lastNameError">Last name must be at least 4 characters and can contain hyphens</div>
-                </div>
-            </div>
-            
-            <div class="form-group-full">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
-                <div class="error-message" id="emailError">Please enter a valid email address</div>
-            </div>
-            
-            <div class="form-group-full">
-                <label for="password">Password</label>
-                <div class="password-container">
-                    <input type="password" id="password" class="form-control" placeholder="Create a password (min 9 characters)" required>
-                    <button type="button" class="toggle-password" id="togglePassword">
-                        <i class="far fa-eye"></i>
-                    </button>
-                </div>
-                <div class="strength-meter">
-                    <div class="strength-meter-fill" id="strengthMeter"></div>
-                </div>
-                <div class="error-message" id="passwordError">Password must be at least 9 characters</div>
-            </div>
-            
-            <div class="form-group-full">
-                <label for="confirmPassword">Confirm Password</label>
-                <div class="password-container">
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
-                    <button type="button" class="toggle-password" id="toggleConfirmPassword">
-                        <i class="far fa-eye"></i>
-                    </button>
-                </div>
-                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
-            </div>
-            
-            <!-- reCAPTCHA Section -->
-            <div class="recaptcha-container">
-                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
-            </div>
-            <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
-            
-            <div class="terms-container">
-                <input type="checkbox" id="terms" required>
-                <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
-            </div>
-            <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
-            
-            <button type="submit" class="signup-button" id="signupButton" disabled>Create Account</button>
-            
-            <!-- Email Verification Section -->
-            <div class="verification-section" id="verificationSection">
-                <h3>Email Verification</h3>
-                <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
-                
-                <div class="verification-code">
-                    <input type="text" maxlength="1" id="digit1" class="verification-digit">
-                    <input type="text" maxlength="1" id="digit2" class="verification-digit">
-                    <input type="text" maxlength="1" id="digit3" class="verification-digit">
-                    <input type="text" maxlength="1" id="digit4" class="verification-digit">
-                    <input type="text" maxlength="1" id="digit5" class="verification-digit">
-                    <input type="text" maxlength="1" id="digit6" class="verification-digit">
+                <div class="form-group-full">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                    <div class="error-message" id="emailError">Please enter a valid email address</div>
                 </div>
                 
-                <div class="error-message" id="verificationError">Invalid verification code</div>
-                <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
-                
-                <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
-                
-                <div class="resend-code">
-                    Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
+                <div class="form-group-full">
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" class="form-control" placeholder="Create a password (min 9 characters)" required>
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="strength-meter">
+                        <div class="strength-meter-fill" id="strengthMeter"></div>
+                    </div>
+                    <div class="error-message" id="passwordError">Password must be at least 9 characters with uppercase, lowercase, and numbers</div>
                 </div>
-            </div>
-            
-            <div class="divider">
-                <span>Or sign up with</span>
-            </div>
-            
-            <!-- Google Sign-In Button -->
-            <div id="g_id_onload"
-                 data-client_id="503341380075-hd4qk0melbav8oio49jnv365i2v194fd.apps.googleusercontent.com"
-                 data-context="signup"
-                 data-ux_mode="popup"
-                 data-callback="handleGoogleSignIn"
-                 data-auto_prompt="false">
-            </div>
+                
+                <div class="form-group-full">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-container">
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+                </div>
+                
+                <!-- reCAPTCHA Section -->
+                <div class="recaptcha-container">
+                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+                </div>
+                <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
+                
+                <div class="terms-container">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
+                </div>
+                <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
+                
+                <button type="submit" class="signup-button" id="signupButton" disabled>
+                    <span id="signupButtonText">Create Account</span>
+                </button>
+                
+                <!-- Email Verification Section -->
+                <div class="verification-section" id="verificationSection">
+                    <h3>Email Verification</h3>
+                    <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
+                    
+                    <div class="verification-code">
+                        <input type="text" maxlength="1" id="digit1" class="verification-digit" aria-label="Verification code digit 1">
+                        <input type="text" maxlength="1" id="digit2" class="verification-digit" aria-label="Verification code digit 2">
+                        <input type="text" maxlength="1" id="digit3" class="verification-digit" aria-label="Verification code digit 3">
+                        <input type="text" maxlength="1" id="digit4" class="verification-digit" aria-label="Verification code digit 4">
+                        <input type="text" maxlength="1" id="digit5" class="verification-digit" aria-label="Verification code digit 5">
+                        <input type="text" maxlength="1" id="digit6" class="verification-digit" aria-label="Verification code digit 6">
+                    </div>
+                    
+                    <div class="error-message" id="verificationError">Invalid verification code</div>
+                    <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
+                    
+                    <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
+                    
+                    <div class="resend-code">
+                        Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
+                    </div>
+                </div>
+                
+                <div class="divider">
+                    <span>Or sign up with</span>
+                </div>
+                
+                <!-- Google Sign-In Button -->
+                <div id="g_id_onload"
+                     data-client_id="503341380075-hd4qk0melbav8oio49jnv365i2v194fd.apps.googleusercontent.com"
+                     data-context="signup"
+                     data-ux_mode="popup"
+                     data-callback="handleGoogleSignIn"
+                     data-auto_prompt="false">
+                </div>
 
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="rectangular"
-                 data-theme="filled_blue"
-                 data-text="signup_with"
-                 data-size="large"
-                 data-logo_alignment="left"
-                 data-width="400">
-            </div>
-            
-            <div class="login-link">
-                Already have an account? <a href="index.html">Sign in</a>
-            </div>
-        </form>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="filled_blue"
+                     data-text="signup_with"
+                     data-size="large"
+                     data-logo_alignment="left"
+                     data-width="400">
+                </div>
+                
+                <div class="login-link">
+                    Already have an account? <a href="index.html">Sign in</a>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -679,6 +711,7 @@ U <br></div>
             const resendCode = document.getElementById('resendCode');
             const verificationDigits = document.querySelectorAll('.verification-digit');
             const signupButton = document.getElementById('signupButton');
+            const signupButtonText = document.getElementById('signupButtonText');
             const termsLink = document.getElementById('termsLink');
             const privacyLink = document.getElementById('privacyLink');
             
@@ -694,6 +727,7 @@ U <br></div>
             
             let generatedCode = '';
             let isRecaptchaVerified = false;
+            let isSubmitting = false;
 
             // Terms and Privacy Policy Links
             termsLink.addEventListener('click', function(e) {
@@ -765,12 +799,14 @@ U <br></div>
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
             });
             
             toggleConfirmPassword.addEventListener('click', function() {
                 const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 confirmPasswordInput.setAttribute('type', type);
                 this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
             });
             
             // Password strength indicator
@@ -778,9 +814,16 @@ U <br></div>
                 const password = this.value;
                 let strength = 0;
                 
+                // Length check
                 if (password.length >= 9) strength += 25;
+                
+                // Lowercase check
                 if (/[a-z]/.test(password)) strength += 25;
+                
+                // Uppercase check
                 if (/[A-Z]/.test(password)) strength += 25;
+                
+                // Number check
                 if (/[0-9]/.test(password)) strength += 25;
                 
                 strengthMeter.style.width = strength + '%';
@@ -793,9 +836,12 @@ U <br></div>
                     strengthMeter.style.backgroundColor = '#4caf50';
                 }
                 
-                if (password.length >= 9) {
+                if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
                     passwordError.style.display = 'none';
-                    passwordInput.style.borderColor = 'var(--glass-border)';
+                    passwordInput.classList.remove('error');
+                    passwordInput.classList.add('success');
+                } else {
+                    passwordInput.classList.remove('success');
                 }
             });
             
@@ -805,11 +851,24 @@ U <br></div>
                     if (this.value.length === 1 && index < verificationDigits.length - 1) {
                         verificationDigits[index + 1].focus();
                     }
+                    
+                    // Auto verify if all digits are filled
+                    const allFilled = Array.from(verificationDigits).every(d => d.value.length === 1);
+                    if (allFilled) {
+                        verifyButton.click();
+                    }
                 });
                 
                 digit.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
                         verificationDigits[index - 1].focus();
+                    }
+                });
+                
+                // Allow only numbers
+                digit.addEventListener('keypress', function(e) {
+                    if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
                     }
                 });
             });
@@ -823,58 +882,53 @@ U <br></div>
             signupForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                if (isSubmitting) return;
+                
                 let isValid = true;
                 
                 // First name validation
                 const firstName = firstNameInput.value.trim();
-                if (firstName.length < 4 || !/^[a-zA-Z\-]+$/.test(firstName)) {
-                    firstNameError.style.display = 'block';
-                    firstNameInput.style.borderColor = '#ff6b6b';
+                if (firstName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(firstName)) {
+                    showError(firstNameInput, firstNameError);
                     isValid = false;
                 } else {
-                    firstNameError.style.display = 'none';
-                    firstNameInput.style.borderColor = 'var(--glass-border)';
+                    hideError(firstNameInput, firstNameError);
                 }
                 
                 // Last name validation
                 const lastName = lastNameInput.value.trim();
-                if (lastName.length < 4 || !/^[a-zA-Z\-]+$/.test(lastName)) {
-                    lastNameError.style.display = 'block';
-                    lastNameInput.style.borderColor = '#ff6b6b';
+                if (lastName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(lastName)) {
+                    showError(lastNameInput, lastNameError);
                     isValid = false;
                 } else {
-                    lastNameError.style.display = 'none';
-                    lastNameInput.style.borderColor = 'var(--glass-border)';
+                    hideError(lastNameInput, lastNameError);
                 }
                 
                 // Email validation
                 if (!validateEmail(emailInput.value)) {
-                    emailError.style.display = 'block';
-                    emailInput.style.borderColor = '#ff6b6b';
+                    showError(emailInput, emailError);
                     isValid = false;
                 } else {
-                    emailError.style.display = 'none';
-                    emailInput.style.borderColor = 'var(--glass-border)';
+                    hideError(emailInput, emailError);
                 }
                 
                 // Password validation
-                if (passwordInput.value.length < 9) {
-                    passwordError.style.display = 'block';
-                    passwordInput.style.borderColor = '#ff6b6b';
+                if (passwordInput.value.length < 9 || 
+                    !/[a-z]/.test(passwordInput.value) || 
+                    !/[A-Z]/.test(passwordInput.value) || 
+                    !/[0-9]/.test(passwordInput.value)) {
+                    showError(passwordInput, passwordError);
                     isValid = false;
                 } else {
-                    passwordError.style.display = 'none';
-                    passwordInput.style.borderColor = 'var(--glass-border)';
+                    hideError(passwordInput, passwordError);
                 }
                 
                 // Confirm password validation
                 if (passwordInput.value !== confirmPasswordInput.value) {
-                    confirmPasswordError.style.display = 'block';
-                    confirmPasswordInput.style.borderColor = '#ff6b6b';
+                    showError(confirmPasswordInput, confirmPasswordError);
                     isValid = false;
                 } else {
-                    confirmPasswordError.style.display = 'none';
-                    confirmPasswordInput.style.borderColor = 'var(--glass-border)';
+                    hideError(confirmPasswordInput, confirmPasswordError);
                 }
                 
                 // reCAPTCHA validation
@@ -895,15 +949,27 @@ U <br></div>
                 
                 // If form is valid, show verification section
                 if (isValid) {
-                    generatedCode = generateVerificationCode();
-                    verificationEmail.textContent = emailInput.value;
-                    verificationSection.style.display = 'block';
+                    isSubmitting = true;
+                    signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
+                    signupButton.disabled = true;
                     
-                    // In a real app, you would send this code to the user's email
-                    console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
-                    alert(`Verification code is ${generatedCode}`);
-                    
-                    verificationSection.scrollIntoView({ behavior: 'smooth' });
+                    // Simulate API call
+                    setTimeout(() => {
+                        generatedCode = generateVerificationCode();
+                        verificationEmail.textContent = emailInput.value;
+                        verificationSection.style.display = 'block';
+                        
+                        // In a real app, you would send this code to the user's email
+                        console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
+                        alert(`Demo: Verification code is ${generatedCode}`);
+                        
+                        verificationSection.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Reset button state
+                        isSubmitting = false;
+                        signupButtonText.textContent = 'Create Account';
+                        signupButton.disabled = false;
+                    }, 1500);
                 }
             });
             
@@ -919,7 +985,7 @@ U <br></div>
                     verificationSuccess.style.display = 'block';
                     verifyButton.textContent = 'Verified!';
                     verifyButton.disabled = true;
-                    verifyButton.style.backgroundColor = '#4caf50';
+                    verifyButton.classList.add('success');
                     
                     setTimeout(function() {
                         alert('Account created and verified successfully!');
@@ -928,18 +994,26 @@ U <br></div>
                         verificationSuccess.style.display = 'none';
                         verifyButton.textContent = 'Verify Email';
                         verifyButton.disabled = false;
-                        verifyButton.style.backgroundColor = '';
+                        verifyButton.classList.remove('success');
                         verificationDigits.forEach(digit => {
                             digit.value = '';
                         });
                         // Reset reCAPTCHA
-                        grecaptcha.reset();
+                        if (window.grecaptcha) {
+                            grecaptcha.reset();
+                        }
                         isRecaptchaVerified = false;
                         signupButton.disabled = true;
                     }, 1500);
                 } else {
                     verificationError.style.display = 'block';
                     verificationSuccess.style.display = 'none';
+                    
+                    // Shake animation for error
+                    verificationSection.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        verificationSection.style.animation = '';
+                    }, 500);
                 }
             });
             
@@ -969,31 +1043,27 @@ U <br></div>
             // Real-time validation
             firstNameInput.addEventListener('input', function() {
                 const firstName = this.value.trim();
-                if (firstName.length >= 4 && /^[a-zA-Z\-]+$/.test(firstName)) {
-                    firstNameError.style.display = 'none';
-                    this.style.borderColor = 'var(--glass-border)';
+                if (firstName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(firstName)) {
+                    hideError(this, firstNameError);
                 }
             });
             
             lastNameInput.addEventListener('input', function() {
                 const lastName = this.value.trim();
-                if (lastName.length >= 4 && /^[a-zA-Z\-]+$/.test(lastName)) {
-                    lastNameError.style.display = 'none';
-                    this.style.borderColor = 'var(--glass-border)';
+                if (lastName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(lastName)) {
+                    hideError(this, lastNameError);
                 }
             });
             
             emailInput.addEventListener('input', function() {
                 if (validateEmail(this.value)) {
-                    emailError.style.display = 'none';
-                    this.style.borderColor = 'var(--glass-border)';
+                    hideError(this, emailError);
                 }
             });
             
             confirmPasswordInput.addEventListener('input', function() {
                 if (this.value === passwordInput.value) {
-                    confirmPasswordError.style.display = 'none';
-                    this.style.borderColor = 'var(--glass-border)';
+                    hideError(this, confirmPasswordError);
                 }
             });
             
@@ -1003,13 +1073,38 @@ U <br></div>
                 }
             });
             
+            // Helper functions
+            function showError(input, errorElement) {
+                errorElement.style.display = 'block';
+                input.classList.add('error');
+                input.classList.remove('success');
+            }
+            
+            function hideError(input, errorElement) {
+                errorElement.style.display = 'none';
+                input.classList.remove('error');
+                if (input.value.trim() !== '') {
+                    input.classList.add('success');
+                }
+            }
+            
             // Email validation function
             function validateEmail(email) {
                 const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return re.test(email);
             }
+            
+            // Add shake animation for errors
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
 </body>
 </html>
-
