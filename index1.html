@@ -1,1112 +1,465 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>nano Company - Sign Up</title>
-    <meta name="description" content="Join nano Company - Create your account today">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Google Sign-In API -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- reCAPTCHA API -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        }
+// reCAPTCHA test keys (for localhost testing)
+// Site Key: 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+// Secret Key: 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
 
-        :root {
-            --primary-color: #000000;
-            --secondary-color: #ffffff;
-            --accent-color: #4285F4;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-color: #ffffff;
-            --input-bg: rgba(255, 255, 255, 0.1);
-            --input-text: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --error-color: #ff6b6b;
-            --success-color: #4caf50;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-color);
-            overflow-x: hidden;
-            transition: background 0.5s ease;
-            padding: 20px;
-        }
-        
-        .background-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://cdn.pixabay.com/photo/2019/09/16/11/39/neon-4480753__340.png') 
-                center/cover no-repeat;
-            filter: blur(8px) brightness(0.7);
-            transform: scale(1.1);
-            animation: hueRotate 15s infinite alternate;
-            z-index: -1;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 0;
-        }
-
-        @keyframes hueRotate {
-            from {
-                filter: blur(8px) brightness(0.7) hue-rotate(0deg);
-            }
-            to {
-                filter: blur(8px) brightness(0.7) hue-rotate(360deg);
-            }
-        }
-        
-        .main-container {
-            display: flex;
-            width: 100%;
-            max-width: 1200px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 40px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .hero-section {
-            flex: 1;
-            padding: 20px;
-            max-width: 500px;
-        }
-        
-        .hero-title {
-            font-size: 80px;
-            font-weight: 600;
-            line-height: 1.1;
-            color: #fff;
-            letter-spacing: -0.03em;
-            margin-bottom: 20px;
-            text-rendering: optimizeLegibility;
-        }
-        
-        .hero-subtitle {
-            font-size: 24px;
-            opacity: 0.9;
-            line-height: 1.4;
-        }
-        
-        .signup-container {
-            background: var(--glass-bg);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px var(--shadow-color);
-            width: 100%;
-            max-width: 450px;
-            overflow: hidden;
-            animation: fadeIn 0.6s ease-out;
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .signup-header {
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            padding: 35px 30px;
-            text-align: center;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        
-        .signup-header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-        
-        .signup-header p {
-            opacity: 0.8;
-            font-size: 15px;
-            font-weight: 400;
-        }
-        
-        .signup-form {
-            padding: 35px 30px;
-        }
-        
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 22px;
-        }
-        
-        .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-        
-        .form-group-full {
-            margin-bottom: 22px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 500;
-            color: var(--text-color);
-            font-size: 15px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 15px 18px;
-            border: 1.5px solid var(--glass-border);
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: var(--input-bg);
-            color: var(--input-text);
-        }
-        
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .form-control:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.15);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-        }
-        
-        .form-control.error {
-            border-color: var(--error-color);
-        }
-        
-        .form-control.success {
-            border-color: var(--success-color);
-        }
-        
-        .password-container {
-            position: relative;
-        }
-        
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        /* reCAPTCHA Container */
-        .recaptcha-container {
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .verification-section {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .verification-code {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .verification-code input {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            border: 2px solid var(--glass-border);
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--input-text);
-        }
-        
-        .verification-code input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-            outline: none;
-        }
-        
-        .resend-code {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .resend-code a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .resend-code a:hover {
-            text-decoration: underline;
-        }
-        
-        .terms-container {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 25px;
-        }
-        
-        .terms-container input {
-            margin-right: 12px;
-            margin-top: 3px;
-            accent-color: var(--accent-color);
-        }
-        
-        .terms-container label {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.5;
-        }
-        
-        .terms-container a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .terms-container a:hover {
-            text-decoration: underline;
-        }
-        
-        .signup-button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .signup-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .signup-button:active {
-            transform: translateY(0);
-        }
-        
-        .signup-button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .verify-button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .verify-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .verify-button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            cursor: not-allowed;
-        }
-        
-        .verify-button.success {
-            background: var(--success-color);
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 25px 0;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-        }
-        
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        
-        .divider span {
-            padding: 0 15px;
-        }
-        
-        .google-signup {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1.5px solid var(--glass-border);
-            border-radius: 10px;
-            padding: 15px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .google-signup:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .google-icon {
-            margin-right: 12px;
-            font-size: 18px;
-        }
-        
-        .login-link {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 15px;
-        }
-        
-        .login-link a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: var(--error-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .success-message {
-            color: var(--success-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .strength-meter {
-            height: 5px;
-            border-radius: 3px;
-            margin-top: 8px;
-            background-color: rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-        
-        .strength-meter-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s, background-color 0.3s;
-        }
-        
-        .g-recaptcha {
-            transform: scale(0.9);
-            transform-origin: 0 0;
-        }
-        
-        /* Loading spinner */
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 1024px) {
-            .main-container {
-                flex-direction: column;
-                gap: 2rem;
-            }
-            
-            .hero-section {
-                text-align: center;
-                max-width: 100%;
-            }
-            
-            .hero-title {
-                font-size: 3rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-            
-            .signup-form {
-                padding: 25px 20px;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-            
-            .form-group {
-                margin-bottom: 22px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .signup-container {
-                max-width: 100%;
-            }
-            
-            .verification-code {
-                gap: 5px;
-            }
-            
-            .verification-code input {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .g-recaptcha {
-                transform: scale(0.8);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="background-image"></div>
-    <div class="overlay"></div>
+document.addEventListener('DOMContentLoaded', function() {
+    const signupForm = document.getElementById('signupForm');
+    const firstNameInput = document.getElementById('firstName');
+    const lastNameInput = document.getElementById('lastName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const termsCheckbox = document.getElementById('terms');
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const strengthMeter = document.getElementById('strengthMeter');
+    const verificationSection = document.getElementById('verificationSection');
+    const verificationEmail = document.getElementById('verificationEmail');
+    const verifyButton = document.getElementById('verifyButton');
+    const resendCode = document.getElementById('resendCode');
+    const verificationDigits = document.querySelectorAll('.verification-digit');
+    const signupButton = document.getElementById('signupButton');
+    const signupButtonText = document.getElementById('signupButtonText');
+    const termsLink = document.getElementById('termsLink');
+    const privacyLink = document.getElementById('privacyLink');
+    const googleSignUp = document.getElementById('googleSignUp');
     
-    <div class="main-container">
-        <div class="hero-section">
-            <h1 class="hero-title">Get Ready with<br>nano Company</h1>
-            <p class="hero-subtitle">The world is almost done with U</p>
-        </div>
+    const firstNameError = document.getElementById('firstNameError');
+    const lastNameError = document.getElementById('lastNameError');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+    const termsError = document.getElementById('termsError');
+    const verificationError = document.getElementById('verificationError');
+    const verificationSuccess = document.getElementById('verificationSuccess');
+    const recaptchaError = document.getElementById('recaptchaError');
+    
+    let generatedCode = '';
+    let isRecaptchaVerified = false;
+    let isSubmitting = false;
+
+    // Initialize Google Sign-Up
+    function initializeGoogleSignUp() {
+        if (window.google && google.accounts.id) {
+            google.accounts.id.initialize({
+                client_id: "503341380075-m65jv6fi8glnuikitdsnt50sdh40mbbn.apps.googleusercontent.com",
+                callback: handleGoogleSignUp,
+                context: "signup",
+                ux_mode: "popup",
+                auto_select: false
+            });
+            console.log('Google Sign-Up initialized successfully');
+        } else {
+            console.warn('Google Sign-In library not loaded yet');
+            // Retry after a delay
+            setTimeout(initializeGoogleSignUp, 500);
+        }
+    }
+
+    // Google Sign-Up callback
+    function handleGoogleSignUp(response) {
+        console.log('Google Sign-Up response received');
         
-        <div class="signup-container">
-            <div class="signup-header">
-                <h1>Create Account</h1>
-                <p>Join our community today</p>
-            </div>
+        try {
+            // Decode the JWT token to get user info
+            const responsePayload = parseJwt(response.credential);
             
-            <form class="signup-form" id="signupForm" novalidate>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required>
-                        <div class="error-message" id="firstNameError">First name must be at least 2 characters and can contain letters, hyphens, and spaces</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required>
-                        <div class="error-message" id="lastNameError">Last name must be at least 2 characters and can contain letters, hyphens, and spaces</div>
-                    </div>
-                </div>
-                
-                <div class="form-group-full">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
-                    <div class="error-message" id="emailError">Please enter a valid email address</div>
-                </div>
-                
-                <div class="form-group-full">
-                    <label for="password">Password</label>
-                    <div class="password-container">
-                        <input type="password" id="password" class="form-control" placeholder="Create a password (min 9 characters)" required>
-                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
-                            <i class="far fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="strength-meter">
-                        <div class="strength-meter-fill" id="strengthMeter"></div>
-                    </div>
-                    <div class="error-message" id="passwordError">Password must be at least 9 characters with uppercase, lowercase, and numbers</div>
-                </div>
-                
-                <div class="form-group-full">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-container">
-                        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
-                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Toggle password visibility">
-                            <i class="far fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
-                </div>
-                
-                <!-- reCAPTCHA Section -->
-                <div class="recaptcha-container">
-                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
-                </div>
-                <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
-                
-                <div class="terms-container">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
-                </div>
-                <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
-                
-                <button type="submit" class="signup-button" id="signupButton" disabled>
-                    <span id="signupButtonText">Create Account</span>
-                </button>
-                
-                <!-- Email Verification Section -->
-                <div class="verification-section" id="verificationSection">
-                    <h3>Email Verification</h3>
-                    <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
-                    
-                    <div class="verification-code">
-                        <input type="text" maxlength="1" id="digit1" class="verification-digit" aria-label="Verification code digit 1">
-                        <input type="text" maxlength="1" id="digit2" class="verification-digit" aria-label="Verification code digit 2">
-                        <input type="text" maxlength="1" id="digit3" class="verification-digit" aria-label="Verification code digit 3">
-                        <input type="text" maxlength="1" id="digit4" class="verification-digit" aria-label="Verification code digit 4">
-                        <input type="text" maxlength="1" id="digit5" class="verification-digit" aria-label="Verification code digit 5">
-                        <input type="text" maxlength="1" id="digit6" class="verification-digit" aria-label="Verification code digit 6">
-                    </div>
-                    
-                    <div class="error-message" id="verificationError">Invalid verification code</div>
-                    <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
-                    
-                    <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
-                    
-                    <div class="resend-code">
-                        Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
-                    </div>
-                </div>
-                
-                <div class="divider">
-                    <span>Or sign up with</span>
-                </div>
-                
-                <!-- Google Sign-In Button -->
-                <div id="g_id_onload"
-                     data-client_id="503341380075-hd4qk0melbav8oio49jnv365i2v194fd.apps.googleusercontent.com"
-                     data-context="signup"
-                     data-ux_mode="popup"
-                     data-callback="handleGoogleSignIn"
-                     data-auto_prompt="false">
-                </div>
+            console.log('New User Info:', {
+                name: responsePayload.name,
+                email: responsePayload.email,
+                picture: responsePayload.picture
+            });
+            
+            // Auto-fill the form with Google data for sign-up
+            const nameParts = responsePayload.name.split(' ');
+            firstNameInput.value = nameParts[0] || '';
+            lastNameInput.value = nameParts.slice(1).join(' ') || '';
+            emailInput.value = responsePayload.email || '';
+            
+            // Show success message for sign-up
+            alert(`Welcome ${responsePayload.name}! Your Google account has been connected for sign-up. Please create a password and complete the reCAPTCHA.`);
+            
+            // Focus on password field to continue registration
+            setTimeout(() => {
+                passwordInput.focus();
+            }, 500);
+            
+            // You would typically send this data to your backend for account creation
+            // createAccountWithGoogle(response.credential);
+            
+        } catch (error) {
+            console.error('Error handling Google Sign-Up:', error);
+            alert('There was an error with Google Sign-Up. Please try again.');
+        }
+    }
 
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="rectangular"
-                     data-theme="filled_blue"
-                     data-text="signup_with"
-                     data-size="large"
-                     data-logo_alignment="left"
-                     data-width="400">
-                </div>
-                
-                <div class="login-link">
-                    Already have an account? <a href="index.html">Sign in</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // reCAPTCHA test keys (for localhost testing)
-        // Site Key: 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
-        // Secret Key: 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+    // Custom Google Sign-Up button handler
+    googleSignUp.addEventListener('click', function() {
+        console.log('Google Sign-Up button clicked');
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const signupForm = document.getElementById('signupForm');
-            const firstNameInput = document.getElementById('firstName');
-            const lastNameInput = document.getElementById('lastName');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            const termsCheckbox = document.getElementById('terms');
-            const togglePassword = document.getElementById('togglePassword');
-            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-            const strengthMeter = document.getElementById('strengthMeter');
-            const verificationSection = document.getElementById('verificationSection');
-            const verificationEmail = document.getElementById('verificationEmail');
-            const verifyButton = document.getElementById('verifyButton');
-            const resendCode = document.getElementById('resendCode');
-            const verificationDigits = document.querySelectorAll('.verification-digit');
-            const signupButton = document.getElementById('signupButton');
-            const signupButtonText = document.getElementById('signupButtonText');
-            const termsLink = document.getElementById('termsLink');
-            const privacyLink = document.getElementById('privacyLink');
-            
-            const firstNameError = document.getElementById('firstNameError');
-            const lastNameError = document.getElementById('lastNameError');
-            const emailError = document.getElementById('emailError');
-            const passwordError = document.getElementById('passwordError');
-            const confirmPasswordError = document.getElementById('confirmPasswordError');
-            const termsError = document.getElementById('termsError');
-            const verificationError = document.getElementById('verificationError');
-            const verificationSuccess = document.getElementById('verificationSuccess');
-            const recaptchaError = document.getElementById('recaptchaError');
-            
-            let generatedCode = '';
-            let isRecaptchaVerified = false;
-            let isSubmitting = false;
-
-            // Terms and Privacy Policy Links
-            termsLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Terms of Service: Please replace this with your actual terms of service content.');
-            });
-            
-            privacyLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Privacy Policy: Please replace this with your actual privacy policy content.');
-            });
-
-            // reCAPTCHA callback functions
-            window.onRecaptchaSuccess = function() {
-                isRecaptchaVerified = true;
-                recaptchaError.style.display = 'none';
-                signupButton.disabled = false;
-                console.log('reCAPTCHA verified successfully');
-            };
-
-            window.onRecaptchaExpired = function() {
-                isRecaptchaVerified = false;
-                signupButton.disabled = true;
-                console.log('reCAPTCHA expired');
-            };
-
-            // Google Sign-In callback
-            window.handleGoogleSignIn = function(response) {
-                console.log('Google Sign-In response:', response);
-                
-                // Decode the JWT token to get user info
-                const responsePayload = parseJwt(response.credential);
-                
-                console.log('User Info:', {
-                    name: responsePayload.name,
-                    email: responsePayload.email,
-                    picture: responsePayload.picture
-                });
-                
-                // Auto-fill the form with Google data
-                const nameParts = responsePayload.name.split(' ');
-                firstNameInput.value = nameParts[0] || '';
-                lastNameInput.value = nameParts.slice(1).join(' ') || '';
-                emailInput.value = responsePayload.email || '';
-                
-                // Show success message
-                alert(`Welcome ${responsePayload.name}! Your Google account has been connected. Please complete the form and reCAPTCHA.`);
-                
-                // You would typically send this data to your backend here
-                // sendToBackend(response.credential);
-            };
-
-            function parseJwt(token) {
-                try {
-                    const base64Url = token.split('.')[1];
-                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-                    return JSON.parse(jsonPayload);
-                } catch (e) {
-                    console.error('Error parsing JWT:', e);
-                    return {};
-                }
-            }
-
-            // Toggle password visibility
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
-                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-            });
-            
-            toggleConfirmPassword.addEventListener('click', function() {
-                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                confirmPasswordInput.setAttribute('type', type);
-                this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
-                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-            });
-            
-            // Password strength indicator
-            passwordInput.addEventListener('input', function() {
-                const password = this.value;
-                let strength = 0;
-                
-                // Length check
-                if (password.length >= 9) strength += 25;
-                
-                // Lowercase check
-                if (/[a-z]/.test(password)) strength += 25;
-                
-                // Uppercase check
-                if (/[A-Z]/.test(password)) strength += 25;
-                
-                // Number check
-                if (/[0-9]/.test(password)) strength += 25;
-                
-                strengthMeter.style.width = strength + '%';
-                
-                if (strength < 50) {
-                    strengthMeter.style.backgroundColor = '#d32f2f';
-                } else if (strength < 75) {
-                    strengthMeter.style.backgroundColor = '#ff9800';
-                } else {
-                    strengthMeter.style.backgroundColor = '#4caf50';
-                }
-                
-                if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-                    passwordError.style.display = 'none';
-                    passwordInput.classList.remove('error');
-                    passwordInput.classList.add('success');
-                } else {
-                    passwordInput.classList.remove('success');
+        // Trigger the Google Sign-Up flow programmatically
+        if (window.google && google.accounts.id) {
+            google.accounts.id.prompt(notification => {
+                if (notification.isNotDisplayed() || notification.isSkipped()) {
+                    // If One Tap UI is not displayed, show manual sign-up
+                    alert('Please click "Sign up with Google" in the popup window to continue.');
                 }
             });
-            
-            // Verification code input handling
-            verificationDigits.forEach((digit, index) => {
-                digit.addEventListener('input', function() {
-                    if (this.value.length === 1 && index < verificationDigits.length - 1) {
-                        verificationDigits[index + 1].focus();
-                    }
-                    
-                    // Auto verify if all digits are filled
-                    const allFilled = Array.from(verificationDigits).every(d => d.value.length === 1);
-                    if (allFilled) {
-                        verifyButton.click();
-                    }
-                });
-                
-                digit.addEventListener('keydown', function(e) {
-                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
-                        verificationDigits[index - 1].focus();
-                    }
-                });
-                
-                // Allow only numbers
-                digit.addEventListener('keypress', function(e) {
-                    if (!/[0-9]/.test(e.key)) {
-                        e.preventDefault();
-                    }
-                });
-            });
-            
-            // Generate a random 6-digit code
-            function generateVerificationCode() {
-                return Math.floor(100000 + Math.random() * 900000).toString();
+        } else {
+            alert('Google Sign-Up is not available at the moment. Please try again later.');
+        }
+    });
+
+    // Initialize Google Sign-Up when the page loads
+    setTimeout(initializeGoogleSignUp, 1000);
+
+    // Terms and Privacy Policy Links
+    termsLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Terms of Service: Please replace this with your actual terms of service content.');
+    });
+    
+    privacyLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Privacy Policy: Please replace this with your actual privacy policy content.');
+    });
+
+    // reCAPTCHA callback functions
+    window.onRecaptchaSuccess = function() {
+        isRecaptchaVerified = true;
+        recaptchaError.style.display = 'none';
+        signupButton.disabled = false;
+        console.log('reCAPTCHA verified successfully');
+    };
+
+    window.onRecaptchaExpired = function() {
+        isRecaptchaVerified = false;
+        signupButton.disabled = true;
+        console.log('reCAPTCHA expired');
+    };
+
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Error parsing JWT:', e);
+            return {};
+        }
+    }
+
+    // Toggle password visibility
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+        this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+        this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+    });
+    
+    // Password strength indicator
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 9) strength += 25;
+        
+        // Lowercase check
+        if (/[a-z]/.test(password)) strength += 25;
+        
+        // Uppercase check
+        if (/[A-Z]/.test(password)) strength += 25;
+        
+        // Number check
+        if (/[0-9]/.test(password)) strength += 25;
+        
+        strengthMeter.style.width = strength + '%';
+        
+        if (strength < 50) {
+            strengthMeter.style.backgroundColor = '#d32f2f';
+        } else if (strength < 75) {
+            strengthMeter.style.backgroundColor = '#ff9800';
+        } else {
+            strengthMeter.style.backgroundColor = '#4caf50';
+        }
+        
+        if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+            passwordError.style.display = 'none';
+            passwordInput.classList.remove('error');
+            passwordInput.classList.add('success');
+        } else {
+            passwordInput.classList.remove('success');
+        }
+    });
+    
+    // Verification code input handling
+    verificationDigits.forEach((digit, index) => {
+        digit.addEventListener('input', function() {
+            if (this.value.length === 1 && index < verificationDigits.length - 1) {
+                verificationDigits[index + 1].focus();
             }
             
-            // Form validation
-            signupForm.addEventListener('submit', function(e) {
+            // Auto verify if all digits are filled
+            const allFilled = Array.from(verificationDigits).every(d => d.value.length === 1);
+            if (allFilled) {
+                verifyButton.click();
+            }
+        });
+        
+        digit.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                verificationDigits[index - 1].focus();
+            }
+        });
+        
+        // Allow only numbers
+        digit.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key)) {
                 e.preventDefault();
-                
-                if (isSubmitting) return;
-                
-                let isValid = true;
-                
-                // First name validation
-                const firstName = firstNameInput.value.trim();
-                if (firstName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(firstName)) {
-                    showError(firstNameInput, firstNameError);
-                    isValid = false;
-                } else {
-                    hideError(firstNameInput, firstNameError);
-                }
-                
-                // Last name validation
-                const lastName = lastNameInput.value.trim();
-                if (lastName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(lastName)) {
-                    showError(lastNameInput, lastNameError);
-                    isValid = false;
-                } else {
-                    hideError(lastNameInput, lastNameError);
-                }
-                
-                // Email validation
-                if (!validateEmail(emailInput.value)) {
-                    showError(emailInput, emailError);
-                    isValid = false;
-                } else {
-                    hideError(emailInput, emailError);
-                }
-                
-                // Password validation
-                if (passwordInput.value.length < 9 || 
-                    !/[a-z]/.test(passwordInput.value) || 
-                    !/[A-Z]/.test(passwordInput.value) || 
-                    !/[0-9]/.test(passwordInput.value)) {
-                    showError(passwordInput, passwordError);
-                    isValid = false;
-                } else {
-                    hideError(passwordInput, passwordError);
-                }
-                
-                // Confirm password validation
-                if (passwordInput.value !== confirmPasswordInput.value) {
-                    showError(confirmPasswordInput, confirmPasswordError);
-                    isValid = false;
-                } else {
-                    hideError(confirmPasswordInput, confirmPasswordError);
-                }
-                
-                // reCAPTCHA validation
-                if (!isRecaptchaVerified) {
-                    recaptchaError.style.display = 'block';
-                    isValid = false;
-                } else {
-                    recaptchaError.style.display = 'none';
-                }
-                
-                // Terms validation
-                if (!termsCheckbox.checked) {
-                    termsError.style.display = 'block';
-                    isValid = false;
-                } else {
-                    termsError.style.display = 'none';
-                }
-                
-                // If form is valid, show verification section
-                if (isValid) {
-                    isSubmitting = true;
-                    signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
-                    signupButton.disabled = true;
-                    
-                    // Simulate API call
-                    setTimeout(() => {
-                        generatedCode = generateVerificationCode();
-                        verificationEmail.textContent = emailInput.value;
-                        verificationSection.style.display = 'block';
-                        
-                        // In a real app, you would send this code to the user's email
-                        console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
-                        alert(`Demo: Verification code is ${generatedCode}`);
-                        
-                        verificationSection.scrollIntoView({ behavior: 'smooth' });
-                        
-                        // Reset button state
-                        isSubmitting = false;
-                        signupButtonText.textContent = 'Create Account';
-                        signupButton.disabled = false;
-                    }, 1500);
-                }
-            });
+            }
+        });
+    });
+    
+    // Generate a random 6-digit code
+    function generateVerificationCode() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+    
+    // Form validation
+    signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (isSubmitting) return;
+        
+        let isValid = true;
+        
+        // First name validation
+        const firstName = firstNameInput.value.trim();
+        if (firstName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(firstName)) {
+            showError(firstNameInput, firstNameError);
+            isValid = false;
+        } else {
+            hideError(firstNameInput, firstNameError);
+        }
+        
+        // Last name validation
+        const lastName = lastNameInput.value.trim();
+        if (lastName.length < 2 || !/^[a-zA-Z\-\s]+$/.test(lastName)) {
+            showError(lastNameInput, lastNameError);
+            isValid = false;
+        } else {
+            hideError(lastNameInput, lastNameError);
+        }
+        
+        // Email validation
+        if (!validateEmail(emailInput.value)) {
+            showError(emailInput, emailError);
+            isValid = false;
+        } else {
+            hideError(emailInput, emailError);
+        }
+        
+        // Password validation
+        if (passwordInput.value.length < 9 || 
+            !/[a-z]/.test(passwordInput.value) || 
+            !/[A-Z]/.test(passwordInput.value) || 
+            !/[0-9]/.test(passwordInput.value)) {
+            showError(passwordInput, passwordError);
+            isValid = false;
+        } else {
+            hideError(passwordInput, passwordError);
+        }
+        
+        // Confirm password validation
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            showError(confirmPasswordInput, confirmPasswordError);
+            isValid = false;
+        } else {
+            hideError(confirmPasswordInput, confirmPasswordError);
+        }
+        
+        // reCAPTCHA validation
+        if (!isRecaptchaVerified) {
+            recaptchaError.style.display = 'block';
+            isValid = false;
+        } else {
+            recaptchaError.style.display = 'none';
+        }
+        
+        // Terms validation
+        if (!termsCheckbox.checked) {
+            termsError.style.display = 'block';
+            isValid = false;
+        } else {
+            termsError.style.display = 'none';
+        }
+        
+        // If form is valid, show verification section
+        if (isValid) {
+            isSubmitting = true;
+            signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
+            signupButton.disabled = true;
             
-            // Verify email button
-            verifyButton.addEventListener('click', function() {
-                let enteredCode = '';
-                verificationDigits.forEach(digit => {
-                    enteredCode += digit.value;
-                });
-                
-                if (enteredCode === generatedCode) {
-                    verificationError.style.display = 'none';
-                    verificationSuccess.style.display = 'block';
-                    verifyButton.textContent = 'Verified!';
-                    verifyButton.disabled = true;
-                    verifyButton.classList.add('success');
-                    
-                    setTimeout(function() {
-                        alert('Account created and verified successfully!');
-                        signupForm.reset();
-                        verificationSection.style.display = 'none';
-                        verificationSuccess.style.display = 'none';
-                        verifyButton.textContent = 'Verify Email';
-                        verifyButton.disabled = false;
-                        verifyButton.classList.remove('success');
-                        verificationDigits.forEach(digit => {
-                            digit.value = '';
-                        });
-                        // Reset reCAPTCHA
-                        if (window.grecaptcha) {
-                            grecaptcha.reset();
-                        }
-                        isRecaptchaVerified = false;
-                        signupButton.disabled = true;
-                    }, 1500);
-                } else {
-                    verificationError.style.display = 'block';
-                    verificationSuccess.style.display = 'none';
-                    
-                    // Shake animation for error
-                    verificationSection.style.animation = 'shake 0.5s';
-                    setTimeout(() => {
-                        verificationSection.style.animation = '';
-                    }, 500);
-                }
-            });
-            
-            // Resend code
-            resendCode.addEventListener('click', function(e) {
-                e.preventDefault();
-                
+            // Simulate API call
+            setTimeout(() => {
                 generatedCode = generateVerificationCode();
-                console.log(`New verification code for ${emailInput.value}: ${generatedCode}`);
-                alert(`Demo: New verification code is ${generatedCode}`);
+                verificationEmail.textContent = emailInput.value;
+                verificationSection.style.display = 'block';
                 
+                // In a real app, you would send this code to the user's email
+                console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
+                alert(`Demo: Verification code is ${generatedCode}`);
+                
+                verificationSection.scrollIntoView({ behavior: 'smooth' });
+                
+                // Reset button state
+                isSubmitting = false;
+                signupButtonText.textContent = 'Create Account';
+                signupButton.disabled = false;
+            }, 1500);
+        }
+    });
+    
+    // Verify email button
+    verifyButton.addEventListener('click', function() {
+        let enteredCode = '';
+        verificationDigits.forEach(digit => {
+            enteredCode += digit.value;
+        });
+        
+        if (enteredCode === generatedCode) {
+            verificationError.style.display = 'none';
+            verificationSuccess.style.display = 'block';
+            verifyButton.textContent = 'Verified!';
+            verifyButton.disabled = true;
+            verifyButton.classList.add('success');
+            
+            setTimeout(function() {
+                alert('Account created and verified successfully!');
+                signupForm.reset();
+                verificationSection.style.display = 'none';
+                verificationSuccess.style.display = 'none';
+                verifyButton.textContent = 'Verify Email';
+                verifyButton.disabled = false;
+                verifyButton.classList.remove('success');
                 verificationDigits.forEach(digit => {
                     digit.value = '';
                 });
-                verificationDigits[0].focus();
-                
-                verificationError.style.display = 'none';
-                verificationSuccess.style.display = 'none';
-                
-                const originalText = resendCode.textContent;
-                resendCode.textContent = 'Code sent!';
-                setTimeout(() => {
-                    resendCode.textContent = originalText;
-                }, 2000);
-            });
-            
-            // Real-time validation
-            firstNameInput.addEventListener('input', function() {
-                const firstName = this.value.trim();
-                if (firstName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(firstName)) {
-                    hideError(this, firstNameError);
+                // Reset reCAPTCHA
+                if (window.grecaptcha) {
+                    grecaptcha.reset();
                 }
-            });
+                isRecaptchaVerified = false;
+                signupButton.disabled = true;
+            }, 1500);
+        } else {
+            verificationError.style.display = 'block';
+            verificationSuccess.style.display = 'none';
             
-            lastNameInput.addEventListener('input', function() {
-                const lastName = this.value.trim();
-                if (lastName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(lastName)) {
-                    hideError(this, lastNameError);
-                }
-            });
-            
-            emailInput.addEventListener('input', function() {
-                if (validateEmail(this.value)) {
-                    hideError(this, emailError);
-                }
-            });
-            
-            confirmPasswordInput.addEventListener('input', function() {
-                if (this.value === passwordInput.value) {
-                    hideError(this, confirmPasswordError);
-                }
-            });
-            
-            termsCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    termsError.style.display = 'none';
-                }
-            });
-            
-            // Helper functions
-            function showError(input, errorElement) {
-                errorElement.style.display = 'block';
-                input.classList.add('error');
-                input.classList.remove('success');
-            }
-            
-            function hideError(input, errorElement) {
-                errorElement.style.display = 'none';
-                input.classList.remove('error');
-                if (input.value.trim() !== '') {
-                    input.classList.add('success');
-                }
-            }
-            
-            // Email validation function
-            function validateEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email);
-            }
-            
-            // Add shake animation for errors
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                    20%, 40%, 60%, 80% { transform: translateX(5px); }
-                }
-            `;
-            document.head.appendChild(style);
+            // Shake animation for error
+            verificationSection.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                verificationSection.style.animation = '';
+            }, 500);
+        }
+    });
+    
+    // Resend code
+    resendCode.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        generatedCode = generateVerificationCode();
+        console.log(`New verification code for ${emailInput.value}: ${generatedCode}`);
+        alert(`Demo: New verification code is ${generatedCode}`);
+        
+        verificationDigits.forEach(digit => {
+            digit.value = '';
         });
-    </script>
-</body>
-</html>
-
-
+        verificationDigits[0].focus();
+        
+        verificationError.style.display = 'none';
+        verificationSuccess.style.display = 'none';
+        
+        const originalText = resendCode.textContent;
+        resendCode.textContent = 'Code sent!';
+        setTimeout(() => {
+            resendCode.textContent = originalText;
+        }, 2000);
+    });
+    
+    // Real-time validation
+    firstNameInput.addEventListener('input', function() {
+        const firstName = this.value.trim();
+        if (firstName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(firstName)) {
+            hideError(this, firstNameError);
+        }
+    });
+    
+    lastNameInput.addEventListener('input', function() {
+        const lastName = this.value.trim();
+        if (lastName.length >= 2 && /^[a-zA-Z\-\s]+$/.test(lastName)) {
+            hideError(this, lastNameError);
+        }
+    });
+    
+    emailInput.addEventListener('input', function() {
+        if (validateEmail(this.value)) {
+            hideError(this, emailError);
+        }
+    });
+    
+    confirmPasswordInput.addEventListener('input', function() {
+        if (this.value === passwordInput.value) {
+            hideError(this, confirmPasswordError);
+        }
+    });
+    
+    termsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            termsError.style.display = 'none';
+        }
+    });
+    
+    // Helper functions
+    function showError(input, errorElement) {
+        errorElement.style.display = 'block';
+        input.classList.add('error');
+        input.classList.remove('success');
+    }
+    
+    function hideError(input, errorElement) {
+        errorElement.style.display = 'none';
+        input.classList.remove('error');
+        if (input.value.trim() !== '') {
+            input.classList.add('success');
+        }
+    }
+    
+    // Email validation function
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // Add shake animation for errors
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
+    document.head.appendChild(style);
+});
