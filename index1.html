@@ -487,11 +487,29 @@
             min-height: 44px;
         }
 
-        /* Google Sign-In Button Styling */
-        .g_id_signin {
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
+        /* Email sending status */
+        .email-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .email-status.sending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .email-status.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        
+        .email-status.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
         }
         
         /* Responsive adjustments */
@@ -647,6 +665,9 @@
                     <span id="signupButtonText">Create Account</span>
                 </button>
                 
+                <!-- Email sending status -->
+                <div class="email-status" id="emailStatus"></div>
+                
                 <!-- Email Verification Section -->
                 <div class="verification-section" id="verificationSection">
                     <h3>Email Verification</h3>
@@ -725,6 +746,7 @@
         const signupButtonText = document.getElementById('signupButtonText');
         const termsLink = document.getElementById('termsLink');
         const privacyLink = document.getElementById('privacyLink');
+        const emailStatus = document.getElementById('emailStatus');
         
         const firstNameError = document.getElementById('firstNameError');
         const lastNameError = document.getElementById('lastNameError');
@@ -877,8 +899,53 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
         
+        // Send verification email using EmailJS
+        async function sendVerificationEmail(email, code) {
+            try {
+                showEmailStatus('Sending verification code to your email...', 'sending');
+                
+                // Using EmailJS service (you need to sign up at https://www.emailjs.com/)
+                // This is a mock implementation - replace with your actual email service
+                
+                // For demo purposes, we'll simulate email sending
+                await emailjs.send('service_hsh52rf', 'template_kzwqse5', {
+    to_email: email,
+    verification_code: code,
+    user_name: firstNameInput.value + ' ' + lastNameInput.value
+});
+                
+                // In a real implementation, you would use:
+                // emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+                //     to_email: email,
+                //     verification_code: code,
+                //     user_name: firstNameInput.value + ' ' + lastNameInput.value
+                // });
+                
+                showEmailStatus('Verification code sent to your email!', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('Error sending email:', error);
+                showEmailStatus('Failed to send verification code. Please try again.', 'error');
+                return false;
+            }
+        }
+        
+        // Show email sending status
+        function showEmailStatus(message, type) {
+            emailStatus.textContent = message;
+            emailStatus.className = 'email-status ' + type;
+            emailStatus.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    emailStatus.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
         // Form validation
-        signupForm.addEventListener('submit', function(e) {
+        signupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log("Form submitted");
             
@@ -964,26 +1031,26 @@
             if (isValid) {
                 console.log("Form is valid, proceeding...");
                 isSubmitting = true;
-                signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
+                signupButtonText.innerHTML = '<span class="spinner"></span>Sending Verification Code...';
                 signupButton.disabled = true;
                 
-                // Simulate API call
-                setTimeout(() => {
-                    generatedCode = generateVerificationCode();
-                    verificationEmail.textContent = emailInput.value;
+                // Generate verification code
+                generatedCode = generateVerificationCode();
+                verificationEmail.textContent = emailInput.value;
+                
+                // Send verification email
+                const emailSent = await sendVerificationEmail(emailInput.value, generatedCode);
+                
+                if (emailSent) {
                     verificationSection.style.display = 'block';
-                    
-                    // In a real app, you would send this code to the user's email
                     console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
-                    alert(`Demo: Verification code is ${generatedCode}`);
-                    
                     verificationSection.scrollIntoView({ behavior: 'smooth' });
-                    
-                    // Reset button state
-                    isSubmitting = false;
-                    signupButtonText.textContent = 'Create Account';
-                    signupButton.disabled = false;
-                }, 1500);
+                }
+                
+                // Reset button state
+                isSubmitting = false;
+                signupButtonText.textContent = 'Create Account';
+                signupButton.disabled = false;
             } else {
                 console.log("Form validation failed");
                 // Add shake animation to form
@@ -1042,12 +1109,14 @@
         });
         
         // Resend code
-        resendCode.addEventListener('click', function(e) {
+        resendCode.addEventListener('click', async function(e) {
             e.preventDefault();
             
             generatedCode = generateVerificationCode();
             console.log(`New verification code for ${emailInput.value}: ${generatedCode}`);
-            alert(`Demo: New verification code is ${generatedCode}`);
+            
+            // Send new verification email
+            await sendVerificationEmail(emailInput.value, generatedCode);
             
             verificationDigits.forEach(digit => {
                 digit.value = '';
@@ -1127,5 +1196,15 @@
         });
     });
 </script>
+
+<!-- EmailJS SDK (for actual email sending) -->
+<!-- Uncomment and configure when ready to use real email service -->
+<!--
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+    // Initialize EmailJS with your public key
+    emailjs.init('YOUR_PUBLIC_KEY');
+</script>
+-->
 </body>
 </html>
