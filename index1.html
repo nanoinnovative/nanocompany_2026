@@ -11,8 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <!-- reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Your CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -34,15 +38,23 @@
             --success-color: #4caf50;
         }
         
+        /* Custom reCAPTCHA Styling */
         .recaptcha-container {
             margin: 20px 0;
             display: flex;
             justify-content: center;
+            overflow: hidden;
+            width: 100%;
         }
 
         .g-recaptcha {
             transform: scale(0.9);
             transform-origin: 0 0;
+        }
+        
+        /* Custom reCAPTCHA styling */
+        .grecaptcha-badge {
+            visibility: hidden;
         }
         
         body {
@@ -103,24 +115,25 @@
         
         .hero-section {
             flex: 1;
-            padding: 20px;
-            max-width: 500px;
+            padding-right: 40px;
         }
         
         .hero-title {
-            font-size: 80px;
-            font-weight: 600;
+            font-family: "Plus Jakarta Sans", "SF Pro Display", "Inter", sans-serif;
+            text-align: left;
+            font-size: 130px;
+            font-weight: 800;
             line-height: 1.1;
-            color: #fff;
             letter-spacing: -0.03em;
             margin-bottom: 20px;
             text-rendering: optimizeLegibility;
-        }
-        
-        .hero-subtitle {
-            font-size: 24px;
-            opacity: 0.9;
-            line-height: 1.4;
+            color: transparent;
+            background: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 
+                0 0 0px rgba(255, 255, 255, 0.5),
+                0 0 0px rgba(255, 255, 255, 0.3);
         }
         
         .signup-container {
@@ -389,32 +402,88 @@
             padding: 0 15px;
         }
         
+        /* Google Sign-In Button Container */
+        .google-button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+        
+        /* Custom Google Sign-In Button */
         .google-signup {
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: 1.5px solid var(--glass-border);
-            border-radius: 10px;
-            padding: 15px;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px 24px;
             width: 100%;
             font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 25px;
+            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .google-signup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
         .google-signup:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
         }
-        
+
+        .google-signup:hover::before {
+            left: 100%;
+        }
+
+        .google-signup:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
         .google-icon {
             margin-right: 12px;
             font-size: 18px;
+            background: conic-gradient(
+                from -45deg, 
+                #ea4335 0deg 90deg, 
+                #4285f4 90deg 180deg, 
+                #34a853 180deg 270deg, 
+                #fbbc05 270deg 360deg
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: brightness(1.2);
         }
         
         .login-link {
@@ -504,7 +573,13 @@
             color: #f44336;
         }
         
-        /* Responsive adjustments */
+        /* Mobile Responsive Styles */
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 100px;
+            }
+        }
+        
         @media (max-width: 1024px) {
             .main-container {
                 flex-direction: column;
@@ -514,20 +589,28 @@
             .hero-section {
                 text-align: center;
                 max-width: 100%;
+                padding-right: 0;
             }
             
             .hero-title {
-                font-size: 3rem;
+                font-size: 80px;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            
+            .signup-container {
+                max-width: 500px;
+                width: 100%;
             }
         }
         
         @media (max-width: 768px) {
             .hero-title {
-                font-size: 2.5rem;
+                font-size: 60px;
             }
             
-            .hero-subtitle {
-                font-size: 1.2rem;
+            .signup-header {
+                padding: 25px 20px;
             }
             
             .signup-form {
@@ -542,19 +625,45 @@
             .form-group {
                 margin-bottom: 22px;
             }
+            
+            .g-recaptcha {
+                transform: scale(0.85);
+            }
+            
+            /* Improved reCAPTCHA positioning for mobile */
+            .recaptcha-container {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
         }
         
-        @media (max-width: 480px) {
+        @media (max-width: 576px) {
             body {
                 padding: 10px;
             }
             
             .hero-title {
-                font-size: 2rem;
+                font-size: 40px;
+                line-height: 1.2;
             }
             
             .signup-container {
                 max-width: 100%;
+                border-radius: 15px;
+            }
+            
+            .signup-header h1 {
+                font-size: 24px;
+            }
+            
+            .signup-header p {
+                font-size: 14px;
+            }
+            
+            .form-control {
+                padding: 12px 15px;
+                font-size: 15px;
             }
             
             .verification-code {
@@ -564,6 +673,50 @@
             .verification-code input {
                 width: 40px;
                 height: 40px;
+                font-size: 18px;
+            }
+            
+            .terms-container label {
+                font-size: 13px;
+            }
+            
+            .signup-button, .verify-button, .google-signup {
+                padding: 14px;
+                font-size: 15px;
+            }
+            
+            .g-recaptcha {
+                transform: scale(0.8);
+            }
+            
+            /* Further improvements for mobile reCAPTCHA */
+            .recaptcha-container {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 380px) {
+            .hero-title {
+                font-size: 32px;
+            }
+            
+            .signup-header {
+                padding: 20px 15px;
+            }
+            
+            .signup-form {
+                padding: 20px 15px;
+            }
+            
+            .verification-code input {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            /* Small screen reCAPTCHA adjustments */
+            .g-recaptcha {
+                transform: scale(0.75);
             }
         }
         
@@ -581,8 +734,7 @@
     
     <div class="main-container">
         <div class="hero-section">
-            <h1 class="hero-title">Get Ready with<br>Nano Company</h1>
-            <p class="hero-subtitle">The world is almost done with U</p>
+            <h1 class="hero-title">Get <br>Ready <br>with<br>nano<br>Company</h1>
         </div>
         
         <div class="signup-container">
@@ -637,13 +789,16 @@
                     <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
                 </div>
                 
-                <!-- ADDED: reCAPTCHA Section -->
+                <!-- IMPROVED: reCAPTCHA Section -->
                 <div class="recaptcha-container">
                     <div class="g-recaptcha" data-sitekey="6Lf1vP0rAAAAAKr3ZRqyX7BNd0sbIQHby72djLu6" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
                 </div>
                 <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
                 
-                
+                <div class="terms-container">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
+                </div>
                 <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
                 
                 <button type="submit" class="signup-button" id="signupButton" disabled>
@@ -676,9 +831,31 @@
                         Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
                     </div>
                 </div>
-                <div class="terms-container">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
+                
+                <!-- IMPROVED: Divider and Google Sign Up Button -->
+                <div class="divider">
+                    <span>Or continue with</span>
+                </div>
+                
+                <!-- Google Sign-In Button -->
+                <div class="google-button-container">
+                    <div id="g_id_onload"
+                         data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                         data-context="signup"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleSignIn"
+                         data-auto_prompt="false">
+                    </div>
+
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="filled_blue"
+                         data-text="signup_with"
+                         data-size="large"
+                         data-logo_alignment="left"
+                         data-width="400">
+                    </div>
                 </div>
                 
                 <div class="login-link">
@@ -718,13 +895,74 @@
         const termsError = document.getElementById('termsError');
         const verificationError = document.getElementById('verificationError');
         const verificationSuccess = document.getElementById('verificationSuccess');
-        const recaptchaError = document.getElementById('recaptchaError'); // ADDED
+        const recaptchaError = document.getElementById('recaptchaError');
+        const termsLink = document.getElementById('termsLink');
+        const privacyLink = document.getElementById('privacyLink');
         
         let verificationCode = "";
         let isSubmitting = false;
-        let isRecaptchaVerified = false; // ADDED
+        let isRecaptchaVerified = false;
 
-        // ADDED: reCAPTCHA callback functions
+        // REAL Google Sign-In Handler
+        window.handleGoogleSignIn = function(response) {
+            console.log("Google Sign-In response:", response);
+            
+            // The response.credential is a JWT ID token
+            const responsePayload = parseJwt(response.credential);
+            console.log("Google user info:", responsePayload);
+            
+            // Pre-fill the form with Google user data
+            if (responsePayload.given_name) {
+                firstNameInput.value = responsePayload.given_name;
+                hideError(firstNameInput, document.getElementById('firstNameError'));
+            }
+            
+            if (responsePayload.family_name) {
+                lastNameInput.value = responsePayload.family_name;
+                hideError(lastNameInput, document.getElementById('lastNameError'));
+            }
+            
+            if (responsePayload.email) {
+                emailInput.value = responsePayload.email;
+                hideError(emailInput, emailError);
+            }
+            
+            // Auto-check terms for convenience
+            termsCheckbox.checked = true;
+            termsError.style.display = 'none';
+            
+            // Focus on password field for user to complete
+            passwordInput.focus();
+            
+            // Show success message
+            showEmailStatus('Google account connected! Please create a password to continue.', 'success');
+            
+            // Auto-complete reCAPTCHA for Google users
+            if (window.grecaptcha && !isRecaptchaVerified) {
+                setTimeout(() => {
+                    if (window.onRecaptchaSuccess) {
+                        window.onRecaptchaSuccess();
+                    }
+                }, 500);
+            }
+        };
+
+        // Helper function to parse JWT
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error('Error parsing JWT:', e);
+                return {};
+            }
+        }
+
+        // IMPROVED: reCAPTCHA callback functions
         window.onRecaptchaSuccess = function() {
             console.log("reCAPTCHA verified");
             isRecaptchaVerified = true;
@@ -815,73 +1053,72 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        // Send verification email using EmailJS - FIXED VERSION
-        // Send verification email using EmailJS - FIXED WITH reCAPTCHA
-// Send verification email using EmailJS - CORRECTED ASYNC FUNCTION
-async function sendVerificationEmail(email, code) {
-    try {
-        showEmailStatus('Sending verification code to your email...', 'sending');
-        console.log('=== EMAILJS DEBUG ===');
-        console.log('Sending to:', email);
-        console.log('Code:', code);
+        // Send verification email using EmailJS
+        async function sendVerificationEmail(email, code) {
+            try {
+                showEmailStatus('Sending verification code to your email...', 'sending');
+                console.log('=== EMAILJS DEBUG ===');
+                console.log('Sending to:', email);
+                console.log('Code:', code);
 
-        // Get reCAPTCHA response
-        const recaptchaResponse = grecaptcha.getResponse();
-        console.log('reCAPTCHA response:', recaptchaResponse);
+                // Get reCAPTCHA response
+                const recaptchaResponse = grecaptcha.getResponse();
+                console.log('reCAPTCHA response:', recaptchaResponse);
 
-        if (!recaptchaResponse) {
-            throw new Error('reCAPTCHA not completed');
-        }
+                if (!recaptchaResponse) {
+                    throw new Error('reCAPTCHA not completed');
+                }
 
-        // Template parameters
-        const templateParams = {
-            email: email,
-            user_name: `${firstNameInput.value} ${lastNameInput.value}`,
-            verification_code: code,
-            from_name: "Nano Company",
-            reply_to: "nanoinnovative615@gmail.com",
-            'g-recaptcha-response': recaptchaResponse
-        };
+                // Template parameters
+                const templateParams = {
+                    email: email,
+                    user_name: `${firstNameInput.value} ${lastNameInput.value}`,
+                    verification_code: code,
+                    from_name: "Nano Company",
+                    reply_to: "nanoinnovative615@gmail.com",
+                    'g-recaptcha-response': recaptchaResponse
+                };
 
-        console.log('Template params:', templateParams);
+                console.log('Template params:', templateParams);
 
-        const serviceID = "service_gxsp6we";
-        const templateID = "template_kzwqse5";
-        
-        console.log('Sending email via EmailJS...');
-        
-        // PROPER ASYNC/AWAIT
-        const response = await emailjs.send(serviceID, templateID, templateParams);
-        
-        console.log('✅ Email sent successfully!', response);
-        showEmailStatus('Verification code sent successfully! Check your inbox.', 'success');
-        return true;
-        
-    } catch (error) {
-        console.error('❌ EmailJS Error:', error);
-        console.error('Error status:', error.status);
-        console.error('Error text:', error.text);
-        
-        let errorMessage = 'Failed to send verification code. ';
-        
-        if (error.status === 400) {
-            if (error.text.includes('reCAPTCHA')) {
-                errorMessage = 'reCAPTCHA verification failed. Please complete the reCAPTCHA.';
-            } else {
-                errorMessage += 'Invalid parameters.';
+                const serviceID = "service_gxsp6we";
+                const templateID = "template_kzwqse5";
+                
+                console.log('Sending email via EmailJS...');
+                
+                // PROPER ASYNC/AWAIT
+                const response = await emailjs.send(serviceID, templateID, templateParams);
+                
+                console.log('✅ Email sent successfully!', response);
+                showEmailStatus('Verification code sent successfully! Check your inbox.', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ EmailJS Error:', error);
+                console.error('Error status:', error.status);
+                console.error('Error text:', error.text);
+                
+                let errorMessage = 'Failed to send verification code. ';
+                
+                if (error.status === 400) {
+                    if (error.text.includes('reCAPTCHA')) {
+                        errorMessage = 'reCAPTCHA verification failed. Please complete the reCAPTCHA.';
+                    } else {
+                        errorMessage += 'Invalid parameters.';
+                    }
+                } else if (error.status === 401) {
+                    errorMessage += 'Unauthorized. Check your EmailJS public key.';
+                } else if (error.status === 403) {
+                    errorMessage += 'Access denied. Check your EmailJS configuration.';
+                } else {
+                    errorMessage += 'Please try again.';
+                }
+                
+                showEmailStatus(errorMessage, 'error');
+                return false;
             }
-        } else if (error.status === 401) {
-            errorMessage += 'Unauthorized. Check your EmailJS public key.';
-        } else if (error.status === 403) {
-            errorMessage += 'Access denied. Check your EmailJS configuration.';
-        } else {
-            errorMessage += 'Please try again.';
         }
-        
-        showEmailStatus(errorMessage, 'error');
-        return false;
-    }
-}
+
         // Show email sending status
         function showEmailStatus(message, type) {
             emailStatus.textContent = message;
@@ -912,20 +1149,20 @@ async function sendVerificationEmail(email, code) {
             const firstName = firstNameInput.value.trim();
             if (firstName.length < 2) {
                 console.log("First name invalid");
-                showError(firstNameInput, firstNameError);
+                showError(firstNameInput, document.getElementById('firstNameError'));
                 isValid = false;
             } else {
-                hideError(firstNameInput, firstNameError);
+                hideError(firstNameInput, document.getElementById('firstNameError'));
             }
             
             // Last name validation
             const lastName = lastNameInput.value.trim();
             if (lastName.length < 2) {
                 console.log("Last name invalid");
-                showError(lastNameInput, lastNameError);
+                showError(lastNameInput, document.getElementById('lastNameError'));
                 isValid = false;
             } else {
-                hideError(lastNameInput, lastNameError);
+                hideError(lastNameInput, document.getElementById('lastNameError'));
             }
             
             // Email validation
@@ -958,7 +1195,7 @@ async function sendVerificationEmail(email, code) {
                 hideError(confirmPasswordInput, confirmPasswordError);
             }
             
-            // ADDED: reCAPTCHA validation
+            // IMPROVED: reCAPTCHA validation
             if (!isRecaptchaVerified) {
                 console.log("reCAPTCHA not verified");
                 recaptchaError.style.display = 'block';
@@ -1086,18 +1323,29 @@ async function sendVerificationEmail(email, code) {
             }, 2000);
         });
         
+        // Terms and Privacy links
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Terms of Service would be displayed here.');
+        });
+        
+        privacyLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Privacy Policy would be displayed here.');
+        });
+        
         // Real-time validation
         firstNameInput.addEventListener('input', function() {
             const firstName = this.value.trim();
             if (firstName.length >= 2) {
-                hideError(this, firstNameError);
+                hideError(this, document.getElementById('firstNameError'));
             }
         });
         
         lastNameInput.addEventListener('input', function() {
             const lastName = this.value.trim();
             if (lastName.length >= 2) {
-                hideError(this, lastNameError);
+                hideError(this, document.getElementById('lastNameError'));
             }
         });
         
