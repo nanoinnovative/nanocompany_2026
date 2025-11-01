@@ -7,13 +7,12 @@
     <meta name="description" content="Join Nano Company - Create your account today">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Google Sign-In API -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- reCAPTCHA API -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- reCAPTCHA API -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
+        /* Your CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -33,6 +32,17 @@
             --shadow-color: rgba(0, 0, 0, 0.3);
             --error-color: #ff6b6b;
             --success-color: #4caf50;
+        }
+        
+        .recaptcha-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .g-recaptcha {
+            transform: scale(0.9);
+            transform-origin: 0 0;
         }
         
         body {
@@ -222,13 +232,6 @@
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             padding: 5px;
-        }
-        
-        /* reCAPTCHA Container */
-        .recaptcha-container {
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
         }
         
         .verification-section {
@@ -459,11 +462,6 @@
             transition: width 0.3s, background-color 0.3s;
         }
         
-        .g-recaptcha {
-            transform: scale(0.9);
-            transform-origin: 0 0;
-        }
-        
         /* Loading spinner */
         .spinner {
             display: inline-block;
@@ -481,14 +479,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Google Button Container */
-        .google-btn-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            min-height: 44px;
-        }
-
         /* Email sending status */
         .email-status {
             padding: 10px;
@@ -575,10 +565,6 @@
                 width: 40px;
                 height: 40px;
             }
-            
-            .g-recaptcha {
-                transform: scale(0.8);
-            }
         }
         
         /* Shake animation */
@@ -651,16 +637,13 @@
                     <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
                 </div>
                 
-                <!-- reCAPTCHA Section -->
+                <!-- ADDED: reCAPTCHA Section -->
                 <div class="recaptcha-container">
-                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+                    <div class="g-recaptcha" data-sitekey="6Lf1vP0rAAAAAKr3ZRqyX7BNd0sbIQHby72djLu6" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
                 </div>
                 <div class="error-message" id="recaptchaError">Please complete the reCAPTCHA verification</div>
                 
-                <div class="terms-container">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
-                </div>
+                
                 <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
                 
                 <button type="submit" class="signup-button" id="signupButton" disabled>
@@ -693,30 +676,9 @@
                         Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
                     </div>
                 </div>
-                
-                <div class="divider">
-                    <span>Or sign up with</span>
-                </div>
-                
-                <!-- Google Sign-In Button -->
-                <div class="google-btn-container">
-                    <div id="g_id_onload"
-                         data-client_id="503341380075-m65jv6fi8glnuikitdsnt50sdh40mbbn.apps.googleusercontent.com"
-                         data-context="signup"
-                         data-ux_mode="popup"
-                         data-callback="handleGoogleSignIn"
-                         data-auto_prompt="false">
-                    </div>
-
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="filled_blue"
-                         data-text="signup_with"
-                         data-size="large"
-                         data-logo_alignment="left"
-                         data-width="400">
-                    </div>
+                <div class="terms-container">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a></label>
                 </div>
                 
                 <div class="login-link">
@@ -727,101 +689,47 @@
     </div>
 
     <script>
-    // Form validation and functionality
     document.addEventListener('DOMContentLoaded', function() {
-        const signupForm = document.getElementById('signupForm');
+        // Initialize EmailJS with your Public Key
+        emailjs.init("nNzlLkkkMXm0D7tdh");
+        
+        // Get DOM elements
+        const signupForm = document.getElementById("signupForm");
+        const emailInput = document.getElementById("email");
+        const verificationSection = document.getElementById("verificationSection");
+        const verifyButton = document.getElementById("verifyButton");
+        const signupButton = document.getElementById("signupButton");
         const firstNameInput = document.getElementById('firstName');
         const lastNameInput = document.getElementById('lastName');
-        const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const termsCheckbox = document.getElementById('terms');
         const togglePassword = document.getElementById('togglePassword');
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
         const strengthMeter = document.getElementById('strengthMeter');
-        const verificationSection = document.getElementById('verificationSection');
         const verificationEmail = document.getElementById('verificationEmail');
-        const verifyButton = document.getElementById('verifyButton');
         const resendCode = document.getElementById('resendCode');
         const verificationDigits = document.querySelectorAll('.verification-digit');
-        const signupButton = document.getElementById('signupButton');
         const signupButtonText = document.getElementById('signupButtonText');
-        const termsLink = document.getElementById('termsLink');
-        const privacyLink = document.getElementById('privacyLink');
         const emailStatus = document.getElementById('emailStatus');
-        
-        const firstNameError = document.getElementById('firstNameError');
-        const lastNameError = document.getElementById('lastNameError');
         const emailError = document.getElementById('emailError');
         const passwordError = document.getElementById('passwordError');
         const confirmPasswordError = document.getElementById('confirmPasswordError');
         const termsError = document.getElementById('termsError');
         const verificationError = document.getElementById('verificationError');
         const verificationSuccess = document.getElementById('verificationSuccess');
-        const recaptchaError = document.getElementById('recaptchaError');
+        const recaptchaError = document.getElementById('recaptchaError'); // ADDED
         
-        let generatedCode = '';
-        let isRecaptchaVerified = false;
+        let verificationCode = "";
         let isSubmitting = false;
+        let isRecaptchaVerified = false; // ADDED
 
-        // Initialize EmailJS with your Public Key
-        (function() {
-            emailjs.init("Q9KWbzMlOU1wSqfNb"); // Replace with your actual EmailJS public key
-            console.log('EmailJS initialized');
-        })();
-
-        // Handle Google Sign-In
-        window.handleGoogleSignIn = function(response) {
-            console.log("Google Sign-In response received");
-            
-            try {
-                // Decode the JWT token
-                const base64Url = response.credential.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                const responsePayload = JSON.parse(jsonPayload);
-                
-                console.log("User data:", responsePayload);
-                
-                // Auto-fill the form
-                const nameParts = responsePayload.name ? responsePayload.name.split(' ') : ['', ''];
-                firstNameInput.value = nameParts[0] || '';
-                lastNameInput.value = nameParts.slice(1).join(' ') || '';
-                emailInput.value = responsePayload.email || '';
-                
-                // Show success message
-                alert(`Welcome ${responsePayload.name || 'User'}! Your Google account has been connected. Please create a password and complete the sign-up.`);
-                
-                // Focus on password field
-                setTimeout(() => {
-                    passwordInput.focus();
-                }, 500);
-                
-            } catch (error) {
-                console.error("Error handling Google Sign-In:", error);
-                alert('There was an error with Google Sign-In. Please try again.');
-            }
-        };
-
-        // Terms and Privacy Policy Links
-        termsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Terms of Service: Please replace this with your actual terms of service content.');
-        });
-        
-        privacyLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Privacy Policy: Please replace this with your actual privacy policy content.');
-        });
-
-        // reCAPTCHA callback functions
+        // ADDED: reCAPTCHA callback functions
         window.onRecaptchaSuccess = function() {
             console.log("reCAPTCHA verified");
             isRecaptchaVerified = true;
-            recaptchaError.style.display = 'none';
             signupButton.disabled = false;
+            recaptchaError.style.display = 'none';
         };
 
         window.onRecaptchaExpired = function() {
@@ -875,7 +783,7 @@
                 }
             }
         });
-        
+
         // Verification code input handling
         verificationDigits.forEach((digit, index) => {
             digit.addEventListener('input', function() {
@@ -907,48 +815,73 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        // Send verification email using EmailJS
-        async function sendVerificationEmail(email, code) {
-            try {
-                showEmailStatus('Sending verification code to your email...', 'sending');
-                console.log('Attempting to send email to:', email);
+        // Send verification email using EmailJS - FIXED VERSION
+        // Send verification email using EmailJS - FIXED WITH reCAPTCHA
+// Send verification email using EmailJS - CORRECTED ASYNC FUNCTION
+async function sendVerificationEmail(email, code) {
+    try {
+        showEmailStatus('Sending verification code to your email...', 'sending');
+        console.log('=== EMAILJS DEBUG ===');
+        console.log('Sending to:', email);
+        console.log('Code:', code);
 
-                // Check if EmailJS is properly initialized
-                if (typeof emailjs === 'undefined') {
-                    throw new Error('EmailJS not loaded');
-                }
+        // Get reCAPTCHA response
+        const recaptchaResponse = grecaptcha.getResponse();
+        console.log('reCAPTCHA response:', recaptchaResponse);
 
-                // Template parameters
-                const templateParams = {
-                    to_email: email,
-                    verification_code: code,
-                    user_name: `${firstNameInput.value} ${lastNameInput.value}`,
-                    from_name: 'Nano Company',
-                    company_name: 'Nano Company',
-                    year: new Date().getFullYear(),
-                    subject: 'Verify Your Nano Company Account'
-                };
-
-                console.log('Template params:', templateParams);
-
-                // Send email using EmailJS
-                const response = await emailjs.send(
-                    'service_hsh52rf', // Your actual service ID
-                    'template_kzwqse5', // Your actual template ID
-                    templateParams
-                );
-                
-                console.log('Email sent successfully:', response);
-                showEmailStatus('Verification code sent to your email!', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('Email sending error:', error);
-                showEmailStatus('Failed to send verification code. Please try again.', 'error');
-                return false;
-            }
+        if (!recaptchaResponse) {
+            throw new Error('reCAPTCHA not completed');
         }
 
+        // Template parameters
+        const templateParams = {
+            email: email,
+            user_name: `${firstNameInput.value} ${lastNameInput.value}`,
+            verification_code: code,
+            from_name: "Nano Company",
+            reply_to: "nanoinnovative615@gmail.com",
+            'g-recaptcha-response': recaptchaResponse
+        };
+
+        console.log('Template params:', templateParams);
+
+        const serviceID = "service_gxsp6we";
+        const templateID = "template_kzwqse5";
+        
+        console.log('Sending email via EmailJS...');
+        
+        // PROPER ASYNC/AWAIT
+        const response = await emailjs.send(serviceID, templateID, templateParams);
+        
+        console.log('✅ Email sent successfully!', response);
+        showEmailStatus('Verification code sent successfully! Check your inbox.', 'success');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ EmailJS Error:', error);
+        console.error('Error status:', error.status);
+        console.error('Error text:', error.text);
+        
+        let errorMessage = 'Failed to send verification code. ';
+        
+        if (error.status === 400) {
+            if (error.text.includes('reCAPTCHA')) {
+                errorMessage = 'reCAPTCHA verification failed. Please complete the reCAPTCHA.';
+            } else {
+                errorMessage += 'Invalid parameters.';
+            }
+        } else if (error.status === 401) {
+            errorMessage += 'Unauthorized. Check your EmailJS public key.';
+        } else if (error.status === 403) {
+            errorMessage += 'Access denied. Check your EmailJS configuration.';
+        } else {
+            errorMessage += 'Please try again.';
+        }
+        
+        showEmailStatus(errorMessage, 'error');
+        return false;
+    }
+}
         // Show email sending status
         function showEmailStatus(message, type) {
             emailStatus.textContent = message;
@@ -1025,7 +958,7 @@
                 hideError(confirmPasswordInput, confirmPasswordError);
             }
             
-            // reCAPTCHA validation
+            // ADDED: reCAPTCHA validation
             if (!isRecaptchaVerified) {
                 console.log("reCAPTCHA not verified");
                 recaptchaError.style.display = 'block';
@@ -1053,11 +986,11 @@
                 signupButton.disabled = true;
                 
                 // Generate verification code
-                generatedCode = generateVerificationCode();
+                verificationCode = generateVerificationCode();
                 verificationEmail.textContent = emailInput.value;
                 
                 // Send verification email
-                const emailSent = await sendVerificationEmail(emailInput.value, generatedCode);
+                const emailSent = await sendVerificationEmail(emailInput.value, verificationCode);
                 
                 if (emailSent) {
                     verificationSection.style.display = 'block';
@@ -1087,14 +1020,10 @@
         
         // Verify email button
         verifyButton.addEventListener('click', function() {
-            let enteredCode = '';
-            verificationDigits.forEach(digit => {
-                enteredCode += digit.value;
-            });
+            const enteredCode = Array.from(verificationDigits).map(digit => digit.value).join('');
+            console.log("Entered code:", enteredCode, "Expected:", verificationCode);
             
-            console.log("Entered code:", enteredCode, "Expected:", generatedCode);
-            
-            if (enteredCode === generatedCode) {
+            if (enteredCode === verificationCode) {
                 verificationError.style.display = 'none';
                 verificationSuccess.style.display = 'block';
                 verifyButton.textContent = 'Verified!';
@@ -1112,13 +1041,14 @@
                     verificationDigits.forEach(digit => {
                         digit.value = '';
                     });
+                    signupButton.disabled = false;
+                    strengthMeter.style.width = '0%';
                     // Reset reCAPTCHA
                     if (window.grecaptcha) {
                         grecaptcha.reset();
                     }
                     isRecaptchaVerified = false;
                     signupButton.disabled = true;
-                    strengthMeter.style.width = '0%';
                 }, 1500);
             } else {
                 verificationError.style.display = 'block';
@@ -1136,10 +1066,10 @@
         resendCode.addEventListener('click', async function(e) {
             e.preventDefault();
             
-            generatedCode = generateVerificationCode();
+            verificationCode = generateVerificationCode();
             
             // Send new verification email
-            await sendVerificationEmail(emailInput.value, generatedCode);
+            await sendVerificationEmail(emailInput.value, verificationCode);
             
             verificationDigits.forEach(digit => {
                 digit.value = '';
@@ -1150,9 +1080,9 @@
             verificationSuccess.style.display = 'none';
             
             const originalText = resendCode.textContent;
-            resendCode.textContent = 'Code sent!';
+            resendCode.innerHTML = 'Code sent!';
             setTimeout(() => {
-                resendCode.textContent = originalText;
+                resendCode.innerHTML = 'Resend Code';
             }, 2000);
         });
         
@@ -1210,13 +1140,11 @@
             return re.test(email);
         }
 
-        // Debug: Check if all elements are properly loaded
-        console.log("All form elements loaded:", {
-            signupForm: !!signupForm,
-            signupButton: !!signupButton,
-            firstNameInput: !!firstNameInput,
-            recaptchaError: !!recaptchaError
-        });
+        // Debug function to see the verification code
+        window.showCode = function() {
+            console.log("Current verification code:", verificationCode);
+            alert("Debug - Current code: " + verificationCode);
+        };
     });
     </script>
 </body>
