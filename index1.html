@@ -11,6 +11,8 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Add this line in the <head> section -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -899,32 +901,31 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
         
-        // Send verification email using EmailJS
         async function sendVerificationEmail(email, code) {
-            try {
-                showEmailStatus('Sending verification code to your email...', 'sending');
-                
-                // Using EmailJS service (you need to sign up at https://www.emailjs.com/)
-                // This is a mock implementation - replace with your actual email service
-                
-                // For demo purposes, we'll simulate email sending
-                await emailjs.send('service_hsh52rf', 'template_kzwqse5', {
-                    to_email: email,
-                    verification_code: code,
-                    user_name: firstNameInput.value + ' ' + lastNameInput.value
-                });
-                
-               
-                
-                showEmailStatus('Verification code sent to your email!', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('Error sending email:', error);
-                showEmailStatus('Failed to send verification code. Please try again.', 'error');
-                return false;
-            }
+    try {
+        showEmailStatus('Sending verification code to your email...', 'sending');
+        
+        // Wait for EmailJS to be ready
+        if (typeof emailjs === 'undefined') {
+            throw new Error('EmailJS not loaded');
         }
+        
+        await emailjs.send('service_abc123', 'template_xyz789', {
+            to_email: email,
+            verification_code: code,
+            user_name: firstNameInput.value + ' ' + lastNameInput.value,
+            from_name: 'Nano Company'
+        });
+        
+        showEmailStatus('Verification code sent to your email!', 'success');
+        return true;
+        
+    } catch (error) {
+        console.error('Error sending email:', error);
+        showEmailStatus('Failed to send verification code. Please try again.', 'error');
+        return false;
+    }
+}
         
         // Show email sending status
         function showEmailStatus(message, type) {
@@ -1191,20 +1192,14 @@
         });
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
-    // Initialize EmailJS with your public key
-    emailjs.init('Q9KWbzMlOU1wSqfNb');
+    // Initialize EmailJS
+    (function() {
+        emailjs.init('Q9KWbzMlOU1wSqfNb');
+        console.log('EmailJS initialized');
+    })();
 </script>
 
-<!-- EmailJS SDK (for actual email sending) -->
-<!-- Uncomment and configure when ready to use real email service -->
-<!--
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-    // Initialize EmailJS with your public key
-    emailjs.init('YOUR_PUBLIC_KEY');
-</script>
--->
+
 </body>
 </html>
