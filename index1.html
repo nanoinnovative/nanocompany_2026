@@ -11,8 +11,8 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <!-- Add this line in the <head> section -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -764,6 +764,12 @@
         let isRecaptchaVerified = false;
         let isSubmitting = false;
 
+        // Initialize EmailJS with your Public Key
+        (function() {
+            emailjs.init("Q9KWbzMlOU1wSqfNb"); // Replace with your actual EmailJS public key
+            console.log('EmailJS initialized');
+        })();
+
         // Handle Google Sign-In
         window.handleGoogleSignIn = function(response) {
             console.log("Google Sign-In response received");
@@ -895,38 +901,54 @@
                 }
             });
         });
-        
+
         // Generate a random 6-digit code
         function generateVerificationCode() {
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
-        
+
+        // Send verification email using EmailJS
         async function sendVerificationEmail(email, code) {
-    try {
-        showEmailStatus('Sending verification code to your email...', 'sending');
-        
-        // Wait for EmailJS to be ready
-        if (typeof emailjs === 'undefined') {
-            throw new Error('EmailJS not loaded');
+            try {
+                showEmailStatus('Sending verification code to your email...', 'sending');
+                console.log('Attempting to send email to:', email);
+
+                // Check if EmailJS is properly initialized
+                if (typeof emailjs === 'undefined') {
+                    throw new Error('EmailJS not loaded');
+                }
+
+                // Template parameters
+                const templateParams = {
+                    to_email: email,
+                    verification_code: code,
+                    user_name: `${firstNameInput.value} ${lastNameInput.value}`,
+                    from_name: 'Nano Company',
+                    company_name: 'Nano Company',
+                    year: new Date().getFullYear(),
+                    subject: 'Verify Your Nano Company Account'
+                };
+
+                console.log('Template params:', templateParams);
+
+                // Send email using EmailJS
+                const response = await emailjs.send(
+                    'service_hsh52rf', // Your actual service ID
+                    'template_kzwqse5', // Your actual template ID
+                    templateParams
+                );
+                
+                console.log('Email sent successfully:', response);
+                showEmailStatus('Verification code sent to your email!', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('Email sending error:', error);
+                showEmailStatus('Failed to send verification code. Please try again.', 'error');
+                return false;
+            }
         }
-        
-        await emailjs.send('service_abc123', 'template_xyz789', {
-            to_email: email,
-            verification_code: code,
-            user_name: firstNameInput.value + ' ' + lastNameInput.value,
-            from_name: 'Nano Company'
-        });
-        
-        showEmailStatus('Verification code sent to your email!', 'success');
-        return true;
-        
-    } catch (error) {
-        console.error('Error sending email:', error);
-        showEmailStatus('Failed to send verification code. Please try again.', 'error');
-        return false;
-    }
-}
-        
+
         // Show email sending status
         function showEmailStatus(message, type) {
             emailStatus.textContent = message;
@@ -939,7 +961,7 @@
                 }, 5000);
             }
         }
-        
+
         // Form validation
         signupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -953,9 +975,9 @@
             let isValid = true;
             console.log("Starting validation...");
             
-            // First name validation - more permissive pattern
+            // First name validation
             const firstName = firstNameInput.value.trim();
-            if (firstName.length < 2 || !/^[a-zA-ZÀ-ÿ\-\s']+$/.test(firstName)) {
+            if (firstName.length < 2) {
                 console.log("First name invalid");
                 showError(firstNameInput, firstNameError);
                 isValid = false;
@@ -963,9 +985,9 @@
                 hideError(firstNameInput, firstNameError);
             }
             
-            // Last name validation - more permissive pattern
+            // Last name validation
             const lastName = lastNameInput.value.trim();
-            if (lastName.length < 2 || !/^[a-zA-ZÀ-ÿ\-\s']+$/.test(lastName)) {
+            if (lastName.length < 2) {
                 console.log("Last name invalid");
                 showError(lastNameInput, lastNameError);
                 isValid = false;
@@ -1039,14 +1061,20 @@
                 
                 if (emailSent) {
                     verificationSection.style.display = 'block';
-                    console.log(`Verification code for ${emailInput.value}: ${generatedCode}`);
                     verificationSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Focus on first verification digit
+                    setTimeout(() => {
+                        verificationDigits[0].focus();
+                    }, 500);
+                } else {
+                    // Reset button state if email failed
+                    signupButtonText.textContent = 'Create Account';
+                    signupButton.disabled = false;
                 }
                 
-                // Reset button state
+                // Reset submitting state
                 isSubmitting = false;
-                signupButtonText.textContent = 'Create Account';
-                signupButton.disabled = false;
             } else {
                 console.log("Form validation failed");
                 // Add shake animation to form
@@ -1109,7 +1137,6 @@
             e.preventDefault();
             
             generatedCode = generateVerificationCode();
-            console.log(`New verification code for ${emailInput.value}: ${generatedCode}`);
             
             // Send new verification email
             await sendVerificationEmail(emailInput.value, generatedCode);
@@ -1132,14 +1159,14 @@
         // Real-time validation
         firstNameInput.addEventListener('input', function() {
             const firstName = this.value.trim();
-            if (firstName.length >= 2 && /^[a-zA-ZÀ-ÿ\-\s']+$/.test(firstName)) {
+            if (firstName.length >= 2) {
                 hideError(this, firstNameError);
             }
         });
         
         lastNameInput.addEventListener('input', function() {
             const lastName = this.value.trim();
-            if (lastName.length >= 2 && /^[a-zA-ZÀ-ÿ\-\s']+$/.test(lastName)) {
+            if (lastName.length >= 2) {
                 hideError(this, lastNameError);
             }
         });
@@ -1191,15 +1218,6 @@
             recaptchaError: !!recaptchaError
         });
     });
-</script>
-<script>
-    // Initialize EmailJS
-    (function() {
-        emailjs.init('Q9KWbzMlOU1wSqfNb');
-        console.log('EmailJS initialized');
-    })();
-</script>
-
-
+    </script>
 </body>
 </html>
