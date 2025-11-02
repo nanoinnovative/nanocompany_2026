@@ -124,7 +124,7 @@ $conn->close();
 // reCAPTCHA verification function
 function verifyRecaptcha($response) {
     // GET YOUR SECRET KEY FROM: https://www.google.com/recaptcha/admin
-    $secretKey = "YOUR_RECAPTCHA_SECRET_KEY_HERE"; // ← MUST UPDATE THIS!
+    $secretKey = "6Lf1vP0rAAAAAKr3ZRqyX7BNd0sbIQHby72djLu6"; // ← MUST UPDATE THIS!
     
     if (empty($response)) {
         return false;
@@ -228,3 +228,4 @@ function sendVerificationEmail($email, $userName, $verificationCode) {
     }
 }
 ?>
+
