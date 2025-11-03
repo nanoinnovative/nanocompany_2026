@@ -7,8 +7,10 @@
     <meta name="description" content="Join Nano Company - Create your account today">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- EmailJS -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <!-- Google Identity Services -->
@@ -811,24 +813,11 @@
                 <!-- Email Verification Section -->
                 <div class="verification-section" id="verificationSection">
                     <h3>Email Verification</h3>
-                    <p>We've sent a 6-digit verification code to <span id="verificationEmail"></span></p>
-                    
-                    <div class="verification-code">
-                        <input type="text" maxlength="1" id="digit1" class="verification-digit" aria-label="Verification code digit 1">
-                        <input type="text" maxlength="1" id="digit2" class="verification-digit" aria-label="Verification code digit 2">
-                        <input type="text" maxlength="1" id="digit3" class="verification-digit" aria-label="Verification code digit 3">
-                        <input type="text" maxlength="1" id="digit4" class="verification-digit" aria-label="Verification code digit 4">
-                        <input type="text" maxlength="1" id="digit5" class="verification-digit" aria-label="Verification code digit 5">
-                        <input type="text" maxlength="1" id="digit6" class="verification-digit" aria-label="Verification code digit 6">
-                    </div>
-                    
-                    <div class="error-message" id="verificationError">Invalid verification code</div>
-                    <div class="success-message" id="verificationSuccess">Email verified successfully!</div>
-                    
-                    <button type="button" class="verify-button" id="verifyButton">Verify Email</button>
+                    <p>We've sent a verification email to <span id="verificationEmail"></span></p>
+                    <p>Please check your inbox and click the verification link to complete your registration.</p>
                     
                     <div class="resend-code">
-                        Didn't receive the code? <a href="#" id="resendCode">Resend Code</a>
+                        Didn't receive the email? <a href="#" id="resendEmail">Resend Verification Email</a>
                     </div>
                 </div>
                 
@@ -839,23 +828,12 @@
                 
                 <!-- Google Sign-In Button -->
                 <div class="google-button-container">
-                    <div id="g_id_onload"
-                         data-client_id="503341380075-m65jv6fi8glnuikitdsnt50sdh40mbbn.apps.googleusercontent.com"
-                         data-context="signup"
-                         data-ux_mode="popup"
-                         data-callback="handleGoogleSignIn"
-                         data-auto_prompt="false">
-                    </div>
-
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="filled_black"
-                         data-text="signup_with"
-                         data-size="large"
-                         data-logo_alignment="left"
-                         data-width="280">
-                    </div>
+                    <button type="button" class="google-signup" id="googleSignUp">
+                        <span class="google-icon">
+                            <i class="fab fa-google"></i>
+                        </span>
+                        Sign up with Google
+                    </button>
                 </div>
                 
                 <div class="login-link">
@@ -867,14 +845,25 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize EmailJS with your Public Key
-        emailjs.init("nNzlLkkkMXm0D7tdh");
-        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // Get DOM elements
         const signupForm = document.getElementById("signupForm");
         const emailInput = document.getElementById("email");
         const verificationSection = document.getElementById("verificationSection");
-        const verifyButton = document.getElementById("verifyButton");
         const signupButton = document.getElementById("signupButton");
         const firstNameInput = document.getElementById('firstName');
         const lastNameInput = document.getElementById('lastName');
@@ -885,82 +874,20 @@
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
         const strengthMeter = document.getElementById('strengthMeter');
         const verificationEmail = document.getElementById('verificationEmail');
-        const resendCode = document.getElementById('resendCode');
-        const verificationDigits = document.querySelectorAll('.verification-digit');
+        const resendEmail = document.getElementById('resendEmail');
         const signupButtonText = document.getElementById('signupButtonText');
         const emailStatus = document.getElementById('emailStatus');
         const emailError = document.getElementById('emailError');
         const passwordError = document.getElementById('passwordError');
         const confirmPasswordError = document.getElementById('confirmPasswordError');
         const termsError = document.getElementById('termsError');
-        const verificationError = document.getElementById('verificationError');
-        const verificationSuccess = document.getElementById('verificationSuccess');
         const recaptchaError = document.getElementById('recaptchaError');
         const termsLink = document.getElementById('termsLink');
         const privacyLink = document.getElementById('privacyLink');
+        const googleSignUp = document.getElementById('googleSignUp');
         
-        let verificationCode = "";
         let isSubmitting = false;
         let isRecaptchaVerified = false;
-
-        // REAL Google Sign-In Handler
-        window.handleGoogleSignIn = function(response) {
-            console.log("Google Sign-In response:", response);
-            
-            // The response.credential is a JWT ID token
-            const responsePayload = parseJwt(response.credential);
-            console.log("Google user info:", responsePayload);
-            
-            // Pre-fill the form with Google user data
-            if (responsePayload.given_name) {
-                firstNameInput.value = responsePayload.given_name;
-                hideError(firstNameInput, document.getElementById('firstNameError'));
-            }
-            
-            if (responsePayload.family_name) {
-                lastNameInput.value = responsePayload.family_name;
-                hideError(lastNameInput, document.getElementById('lastNameError'));
-            }
-            
-            if (responsePayload.email) {
-                emailInput.value = responsePayload.email;
-                hideError(emailInput, emailError);
-            }
-            
-            // Auto-check terms for convenience
-            termsCheckbox.checked = true;
-            termsError.style.display = 'none';
-            
-            // Focus on password field for user to complete
-            passwordInput.focus();
-            
-            // Show success message
-            showEmailStatus('Google account connected! Please create a password to continue.', 'success');
-            
-            // Auto-complete reCAPTCHA for Google users
-            if (window.grecaptcha && !isRecaptchaVerified) {
-                setTimeout(() => {
-                    if (window.onRecaptchaSuccess) {
-                        window.onRecaptchaSuccess();
-                    }
-                }, 500);
-            }
-        };
-
-        // Helper function to parse JWT
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                console.error('Error parsing JWT:', e);
-                return {};
-            }
-        }
 
         // IMPROVED: reCAPTCHA callback functions
         window.onRecaptchaSuccess = function() {
@@ -1022,103 +949,6 @@
             }
         });
 
-        // Verification code input handling
-        verificationDigits.forEach((digit, index) => {
-            digit.addEventListener('input', function() {
-                if (this.value.length === 1 && index < verificationDigits.length - 1) {
-                    verificationDigits[index + 1].focus();
-                }
-                
-                const allFilled = Array.from(verificationDigits).every(d => d.value.length === 1);
-                if (allFilled) {
-                    setTimeout(() => verifyButton.click(), 100);
-                }
-            });
-            
-            digit.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
-                    verificationDigits[index - 1].focus();
-                }
-            });
-            
-            digit.addEventListener('keypress', function(e) {
-                if (!/[0-9]/.test(e.key)) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // Generate a random 6-digit code
-        function generateVerificationCode() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
-
-        // Send verification email using EmailJS
-        async function sendVerificationEmail(email, code) {
-            try {
-                showEmailStatus('Sending verification code to your email...', 'sending');
-                console.log('=== EMAILJS DEBUG ===');
-                console.log('Sending to:', email);
-                console.log('Code:', code);
-
-                // Get reCAPTCHA response
-                const recaptchaResponse = grecaptcha.getResponse();
-                console.log('reCAPTCHA response:', recaptchaResponse);
-
-                if (!recaptchaResponse) {
-                    throw new Error('reCAPTCHA not completed');
-                }
-
-                // Template parameters
-                const templateParams = {
-                    email: email,
-                    user_name: `${firstNameInput.value} ${lastNameInput.value}`,
-                    verification_code: code,
-                    from_name: "Nano Company",
-                    reply_to: "nanoinnovative615@gmail.com",
-                    'g-recaptcha-response': recaptchaResponse
-                };
-
-                console.log('Template params:', templateParams);
-
-                const serviceID = "service_gxsp6we";
-                const templateID = "template_kzwqse5";
-                
-                console.log('Sending email via EmailJS...');
-                
-                // PROPER ASYNC/AWAIT
-                const response = await emailjs.send(serviceID, templateID, templateParams);
-                
-                console.log('✅ Email sent successfully!', response);
-                showEmailStatus('Verification code sent successfully! Check your inbox.', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ EmailJS Error:', error);
-                console.error('Error status:', error.status);
-                console.error('Error text:', error.text);
-                
-                let errorMessage = 'Failed to send verification code. ';
-                
-                if (error.status === 400) {
-                    if (error.text.includes('reCAPTCHA')) {
-                        errorMessage = 'reCAPTCHA verification failed. Please complete the reCAPTCHA.';
-                    } else {
-                        errorMessage += 'Invalid parameters.';
-                    }
-                } else if (error.status === 401) {
-                    errorMessage += 'Unauthorized. Check your EmailJS public key.';
-                } else if (error.status === 403) {
-                    errorMessage += 'Access denied. Check your EmailJS configuration.';
-                } else {
-                    errorMessage += 'Please try again.';
-                }
-                
-                showEmailStatus(errorMessage, 'error');
-                return false;
-            }
-        }
-
         // Show email sending status
         function showEmailStatus(message, type) {
             emailStatus.textContent = message;
@@ -1132,7 +962,7 @@
             }
         }
 
-        // Form validation
+        // Form validation and submission
         signupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log("Form submitted");
@@ -1215,36 +1045,66 @@
             
             console.log("Validation result:", isValid);
             
-            // If form is valid, show verification section
+            // If form is valid, create user with Firebase
             if (isValid) {
-                console.log("Form is valid, proceeding...");
+                console.log("Form is valid, creating user with Firebase...");
                 isSubmitting = true;
-                signupButtonText.innerHTML = '<span class="spinner"></span>Sending Verification Code...';
+                signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
                 signupButton.disabled = true;
                 
-                // Generate verification code
-                verificationCode = generateVerificationCode();
-                verificationEmail.textContent = emailInput.value;
-                
-                // Send verification email
-                const emailSent = await sendVerificationEmail(emailInput.value, verificationCode);
-                
-                if (emailSent) {
+                try {
+                    const email = emailInput.value.trim();
+                    const password = passwordInput.value;
+                    
+                    // Create user with Firebase Auth
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    
+                    // Send email verification
+                    await user.sendEmailVerification();
+                    
+                    // Store additional user data in Firestore
+                    await db.collection('users').doc(user.uid).set({
+                        firstName: firstNameInput.value.trim(),
+                        lastName: lastNameInput.value.trim(),
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        emailVerified: false
+                    });
+                    
+                    // Show verification section
+                    verificationEmail.textContent = email;
+                    showEmailStatus('Account created! Verification email sent to your inbox.', 'success');
                     verificationSection.style.display = 'block';
                     verificationSection.scrollIntoView({ behavior: 'smooth' });
                     
-                    // Focus on first verification digit
-                    setTimeout(() => {
-                        verificationDigits[0].focus();
-                    }, 500);
-                } else {
-                    // Reset button state if email failed
-                    signupButtonText.textContent = 'Create Account';
+                } catch (error) {
+                    console.error('Firebase error:', error);
+                    let errorMessage = 'Error creating account: ';
+                    
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage += 'Email is already in use.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage += 'Invalid email address.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage += 'Password is too weak.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage += 'Network error. Please check your connection.';
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+                    
+                    showEmailStatus(errorMessage, 'error');
                     signupButton.disabled = false;
+                } finally {
+                    signupButtonText.textContent = 'Create Account';
+                    isSubmitting = false;
                 }
-                
-                // Reset submitting state
-                isSubmitting = false;
             } else {
                 console.log("Form validation failed");
                 // Add shake animation to form
@@ -1254,75 +1114,85 @@
                 }, 500);
             }
         });
-        
-        // Verify email button
-        verifyButton.addEventListener('click', function() {
-            const enteredCode = Array.from(verificationDigits).map(digit => digit.value).join('');
-            console.log("Entered code:", enteredCode, "Expected:", verificationCode);
-            
-            if (enteredCode === verificationCode) {
-                verificationError.style.display = 'none';
-                verificationSuccess.style.display = 'block';
-                verifyButton.textContent = 'Verified!';
-                verifyButton.disabled = true;
-                verifyButton.classList.add('success');
-                
-                setTimeout(function() {
-                    alert('Account created and verified successfully!');
-                    signupForm.reset();
-                    verificationSection.style.display = 'none';
-                    verificationSuccess.style.display = 'none';
-                    verifyButton.textContent = 'Verify Email';
-                    verifyButton.disabled = false;
-                    verifyButton.classList.remove('success');
-                    verificationDigits.forEach(digit => {
-                        digit.value = '';
-                    });
-                    signupButton.disabled = false;
-                    strengthMeter.style.width = '0%';
-                    // Reset reCAPTCHA
-                    if (window.grecaptcha) {
-                        grecaptcha.reset();
-                    }
-                    isRecaptchaVerified = false;
-                    signupButton.disabled = true;
-                }, 1500);
-            } else {
-                verificationError.style.display = 'block';
-                verificationSuccess.style.display = 'none';
-                
-                // Shake animation for error
-                verificationSection.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    verificationSection.style.animation = '';
-                }, 500);
-            }
-        });
-        
-        // Resend code
-        resendCode.addEventListener('click', async function(e) {
+
+        // Resend verification email
+        resendEmail.addEventListener('click', async function(e) {
             e.preventDefault();
             
-            verificationCode = generateVerificationCode();
-            
-            // Send new verification email
-            await sendVerificationEmail(emailInput.value, verificationCode);
-            
-            verificationDigits.forEach(digit => {
-                digit.value = '';
-            });
-            verificationDigits[0].focus();
-            
-            verificationError.style.display = 'none';
-            verificationSuccess.style.display = 'none';
-            
-            const originalText = resendCode.textContent;
-            resendCode.innerHTML = 'Code sent!';
-            setTimeout(() => {
-                resendCode.innerHTML = 'Resend Code';
-            }, 2000);
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    await user.sendEmailVerification();
+                    showEmailStatus('Verification email sent!', 'success');
+                    
+                    const originalText = resendEmail.textContent;
+                    resendEmail.innerHTML = 'Email sent!';
+                    setTimeout(() => {
+                        resendEmail.innerHTML = 'Resend Verification Email';
+                    }, 2000);
+                } else {
+                    showEmailStatus('Please sign in again to resend verification email.', 'error');
+                }
+            } catch (error) {
+                console.error('Error resending verification email:', error);
+                showEmailStatus('Error sending verification email. Please try again.', 'error');
+            }
         });
-        
+
+        // Google Sign-In
+        googleSignUp.addEventListener('click', async function() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                // Add scopes if needed
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Check if user is new or existing
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // New user - store in Firestore
+                    await db.collection('users').doc(user.uid).set({
+                        firstName: user.displayName ? user.displayName.split(' ')[0] : '',
+                        lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+                        email: user.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        emailVerified: user.emailVerified,
+                        googleSignIn: true
+                    });
+                    
+                    showEmailStatus('Account created successfully with Google!', 'success');
+                } else {
+                    showEmailStatus('Signed in successfully with Google!', 'success');
+                }
+                
+                // Redirect to dashboard or home page after successful sign-in
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Google Sign-In error:', error);
+                let errorMessage = 'Error signing in with Google: ';
+                
+                switch (error.code) {
+                    case 'auth/popup-closed-by-user':
+                        errorMessage = 'Sign-in was cancelled.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage += 'Network error. Please check your connection.';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                showEmailStatus(errorMessage, 'error');
+            }
+        });
+
         // Terms and Privacy links
         termsLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1387,13 +1257,7 @@
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
-
-        // Debug function to see the verification code
-        window.showCode = function() {
-            console.log("Current verification code:", verificationCode);
-            alert("Debug - Current code: " + verificationCode);
-        };
     });
     </script>
 </body>
-</html> 
+</html>
