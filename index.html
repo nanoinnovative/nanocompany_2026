@@ -13,8 +13,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -844,90 +842,23 @@
     </div>
 
     <script>
-        <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Firebase configuration
-        Const firebaseConfig = {
-
-  apiKey: "AIzaSyAG-0TLa4IUXxzdz9zECkTvNa4aKCsvg",
-
-  authenticDomain: "nanocompany-2026-34c4f.firebaseapp.com",
-
-  projectId: "nanocompany-2026-34c4f",
-
-  storageBucket: "nanocompany-2026-34c4f.firebasestorage.app",
-
-  messagingSenderId: "694553917141",
-
-  appId: "1:694553917141:web:e9232e87caee866438945c",
-
-  measurementId: "G-RSDB3MJ8HP"
-
-};
-
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Sign-up form submission
-    signupForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Your validation code here...
-        
-        if (isValid) {
-            try {
-                // 1. Create user in Firebase Auth
-                const userCredential = await auth.createUserWithEmailAndPassword(
-                    emailInput.value.trim(), 
-                    passwordInput.value
-                );
-                const user = userCredential.user;
-
-                // 2. Store user data in Firestore (PRODUCTION MODE SAFE)
-                await db.collection('users').doc(user.uid).set({
-                    firstName: firstNameInput.value.trim(),
-                    lastName: lastNameInput.value.trim(),
-                    email: emailInput.value.trim(),
-                    emailVerified: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                    profileCompleted: false,
-                    accountType: "free",
-                    preferences: {
-                        newsletter: true,
-                        notifications: true
-                    }
-                });
-
-                // 3. Send email verification
-                await user.sendEmailVerification();
-
-                // Show success message
-                showEmailStatus('Account created! Check your email for verification.', 'success');
-                
-            } catch (error) {
-                console.error('Error:', error);
-                // Handle specific errors
-                if (error.code === 'auth/email-already-in-use') {
-                    showEmailStatus('This email is already registered.', 'error');
-                } else {
-                    showEmailStatus('Error creating account: ' + error.message, 'error');
-                }
-            }
-        }
-    });
-});
-
-
+        // Firebase configuration - FIXED VERSION
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG-0TLa4IUXxzdz9zECkTvNa4aKCsvg",
+            authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
+            projectId: "nanocompany-2026-34c4f",
+            storageBucket: "nanocompany-2026-34c4f.firebasestorage.app",
+            messagingSenderId: "694553917141",
+            appId: "1:694553917141:web:e9232e87caee866438945c",
+            measurementId: "G-RSDB3MJ8HP"
+        };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const analytics = getAnalytics(app);
+
         // Get DOM elements
         const signupForm = document.getElementById("signupForm");
         const emailInput = document.getElementById("email");
@@ -1137,7 +1068,14 @@
                         lastName: lastNameInput.value.trim(),
                         email: email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        emailVerified: false
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                        emailVerified: false,
+                        profileCompleted: false,
+                        accountType: "free",
+                        preferences: {
+                            newsletter: true,
+                            notifications: true
+                        }
                     });
                     
                     // Show verification section
@@ -1229,7 +1167,9 @@
                         email: user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         emailVerified: user.emailVerified,
-                        googleSignIn: true
+                        googleSignIn: true,
+                        profileCompleted: false,
+                        accountType: "free"
                     });
                     
                     showEmailStatus('Account created successfully with Google!', 'success');
@@ -1329,5 +1269,3 @@
     </script>
 </body>
 </html>
-
-
