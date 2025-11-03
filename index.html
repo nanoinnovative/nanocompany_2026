@@ -777,11 +777,24 @@
   </div>
 
   <script>
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyAG-0TLa4IhUXxzdz9zECkTvNa4zAKCsvg",
+    // Import the functions you need from the SDKs you need
+
+import { initializeApp } from "firebase/app";
+
+import { getAnalytics } from "firebase/analytics";
+
+// TODO: Add SDKs for Firebase products that you want to use
+
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+
+// Your web app's Firebase configuration
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyAG-0TLa4IhUXxzdz9zECkTvNa4zAKCsvg",
 
   authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
 
@@ -795,7 +808,8 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase
 
   measurementId: "G-RSDB3MJ8HP"
 
-    };
+};
+
 
     // Initialize Firebase
     try {
@@ -1226,5 +1240,6 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase
   </script>
 </body>
 </html>
+
 
 
