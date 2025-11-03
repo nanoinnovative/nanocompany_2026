@@ -775,7 +775,7 @@
     </div>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration - CORRECTED VERSION
         const firebaseConfig = {
             apiKey: "AIzaSyAG-0TLa4IUXxzdz9zECkTvNa4aKCsvg",
             authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
@@ -787,7 +787,13 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -822,7 +828,7 @@
 
         // reCAPTCHA callback functions
         window.onRecaptchaSuccess = function() {
-            console.log("reCAPTCHA verified");
+            console.log("reCAPTCHA verified successfully");
             isRecaptchaVerified = true;
             signupButton.disabled = false;
             recaptchaError.style.display = 'none';
@@ -976,12 +982,17 @@
                     const email = emailInput.value.trim();
                     const password = passwordInput.value;
                     
+                    console.log("Creating user with email:", email);
+                    
                     // Create user with Firebase Auth
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     const user = userCredential.user;
                     
+                    console.log("User created:", user.uid);
+                    
                     // Send email verification
                     await user.sendEmailVerification();
+                    console.log("Verification email sent");
                     
                     // Store additional user data in Firestore
                     await db.collection('users').doc(user.uid).set({
@@ -999,11 +1010,18 @@
                         }
                     });
                     
+                    console.log("User data stored in Firestore");
+                    
                     // Show verification section
                     verificationEmail.textContent = email;
                     showEmailStatus('Account created! Verification email sent to your inbox.', 'success');
                     verificationSection.style.display = 'block';
                     verificationSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Reset form
+                    signupForm.reset();
+                    isRecaptchaVerified = false;
+                    signupButton.disabled = true;
                     
                 } catch (error) {
                     console.error('Firebase error:', error);
@@ -1022,15 +1040,18 @@
                         case 'auth/network-request-failed':
                             errorMessage = 'Network error. Please check your internet connection.';
                             break;
+                        case 'auth/operation-not-allowed':
+                            errorMessage = 'Email/password accounts are not enabled. Please contact support.';
+                            break;
                         default:
-                            errorMessage = 'An error occurred. Please try again.';
+                            errorMessage = 'An error occurred. Please try again. Error: ' + error.message;
                     }
                     
                     showEmailStatus(errorMessage, 'error');
-                    signupButton.disabled = false;
                 } finally {
                     signupButtonText.textContent = 'Create Account';
                     isSubmitting = false;
+                    signupButton.disabled = false;
                 }
             } else {
                 // Add shake animation to form
@@ -1112,8 +1133,11 @@
                     case 'auth/network-request-failed':
                         errorMessage = 'Network error. Please check your connection.';
                         break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = 'Google sign-in is not enabled. Please contact support.';
+                        break;
                     default:
-                        errorMessage = 'An error occurred. Please try again.';
+                        errorMessage = 'An error occurred. Please try again. Error: ' + error.message;
                 }
                 
                 showEmailStatus(errorMessage, 'error');
@@ -1184,6 +1208,10 @@
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
+
+        // Test Firebase connection
+        console.log("Firebase auth object:", auth);
+        console.log("Firebase firestore object:", db);
     </script>
 </body>
 </html>
