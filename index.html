@@ -256,29 +256,6 @@
             border: 1px solid var(--glass-border);
         }
         
-        .verification-code {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .verification-code input {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            border: 2px solid var(--glass-border);
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--input-text);
-        }
-        
-        .verification-code input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-            outline: none;
-        }
-        
         .resend-code {
             margin-top: 15px;
             text-align: center;
@@ -352,34 +329,6 @@
             background: rgba(255, 255, 255, 0.1);
             cursor: not-allowed;
             transform: none;
-        }
-        
-        .verify-button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .verify-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .verify-button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            cursor: not-allowed;
-        }
-        
-        .verify-button.success {
-            background: var(--success-color);
         }
         
         .divider {
@@ -666,21 +615,11 @@
                 font-size: 15px;
             }
             
-            .verification-code {
-                gap: 5px;
-            }
-            
-            .verification-code input {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-            
             .terms-container label {
                 font-size: 13px;
             }
             
-            .signup-button, .verify-button, .google-signup {
+            .signup-button, .google-signup {
                 padding: 14px;
                 font-size: 15px;
             }
@@ -706,12 +645,6 @@
             
             .signup-form {
                 padding: 20px 15px;
-            }
-            
-            .verification-code input {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
             }
             
             /* Small screen reCAPTCHA adjustments */
@@ -789,7 +722,7 @@
                     <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
                 </div>
                 
-                <!-- IMPROVED: reCAPTCHA Section -->
+                <!-- reCAPTCHA Section -->
                 <div class="recaptcha-container">
                     <div class="g-recaptcha" data-sitekey="6Lf1vP0rAAAAAKr3ZRqyX7BNd0sbIQHby72djLu6" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
                 </div>
@@ -819,7 +752,7 @@
                     </div>
                 </div>
                 
-                <!-- IMPROVED: Divider and Google Sign Up Button -->
+                <!-- Divider and Google Sign Up Button -->
                 <div class="divider">
                     <span>Or continue with</span>
                 </div>
@@ -843,7 +776,7 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Firebase configuration - FIXED VERSION
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAG-0TLa4IUXxzdz9zECkTvNa4aKCsvg",
             authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
@@ -888,7 +821,7 @@
         let isSubmitting = false;
         let isRecaptchaVerified = false;
 
-        // IMPROVED: reCAPTCHA callback functions
+        // reCAPTCHA callback functions
         window.onRecaptchaSuccess = function() {
             console.log("reCAPTCHA verified");
             isRecaptchaVerified = true;
@@ -972,12 +905,10 @@
             }
             
             let isValid = true;
-            console.log("Starting validation...");
             
             // First name validation
             const firstName = firstNameInput.value.trim();
             if (firstName.length < 2) {
-                console.log("First name invalid");
                 showError(firstNameInput, document.getElementById('firstNameError'));
                 isValid = false;
             } else {
@@ -987,7 +918,6 @@
             // Last name validation
             const lastName = lastNameInput.value.trim();
             if (lastName.length < 2) {
-                console.log("Last name invalid");
                 showError(lastNameInput, document.getElementById('lastNameError'));
                 isValid = false;
             } else {
@@ -996,7 +926,6 @@
             
             // Email validation
             if (!validateEmail(emailInput.value)) {
-                console.log("Email invalid");
                 showError(emailInput, emailError);
                 isValid = false;
             } else {
@@ -1008,7 +937,6 @@
                 !/[a-z]/.test(passwordInput.value) || 
                 !/[A-Z]/.test(passwordInput.value) || 
                 !/[0-9]/.test(passwordInput.value)) {
-                console.log("Password invalid");
                 showError(passwordInput, passwordError);
                 isValid = false;
             } else {
@@ -1017,16 +945,14 @@
             
             // Confirm password validation
             if (passwordInput.value !== confirmPasswordInput.value) {
-                console.log("Passwords don't match");
                 showError(confirmPasswordInput, confirmPasswordError);
                 isValid = false;
             } else {
                 hideError(confirmPasswordInput, confirmPasswordError);
             }
             
-            // IMPROVED: reCAPTCHA validation
+            // reCAPTCHA validation
             if (!isRecaptchaVerified) {
-                console.log("reCAPTCHA not verified");
                 recaptchaError.style.display = 'block';
                 isValid = false;
             } else {
@@ -1035,18 +961,14 @@
             
             // Terms validation
             if (!termsCheckbox.checked) {
-                console.log("Terms not accepted");
                 termsError.style.display = 'block';
                 isValid = false;
             } else {
                 termsError.style.display = 'none';
             }
             
-            console.log("Validation result:", isValid);
-            
             // If form is valid, create user with Firebase
             if (isValid) {
-                console.log("Form is valid, creating user with Firebase...");
                 isSubmitting = true;
                 signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
                 signupButton.disabled = true;
@@ -1090,19 +1012,19 @@
                     
                     switch (error.code) {
                         case 'auth/email-already-in-use':
-                            errorMessage += 'Email is already in use.';
+                            errorMessage = 'This email is already registered.';
                             break;
                         case 'auth/invalid-email':
-                            errorMessage += 'Invalid email address.';
+                            errorMessage = 'Please enter a valid email address.';
                             break;
                         case 'auth/weak-password':
-                            errorMessage += 'Password is too weak.';
+                            errorMessage = 'Password is too weak. Please use a stronger password.';
                             break;
                         case 'auth/network-request-failed':
-                            errorMessage += 'Network error. Please check your connection.';
+                            errorMessage = 'Network error. Please check your internet connection.';
                             break;
                         default:
-                            errorMessage += error.message;
+                            errorMessage = 'An error occurred. Please try again.';
                     }
                     
                     showEmailStatus(errorMessage, 'error');
@@ -1112,7 +1034,6 @@
                     isSubmitting = false;
                 }
             } else {
-                console.log("Form validation failed");
                 // Add shake animation to form
                 signupForm.style.animation = 'shake 0.5s';
                 setTimeout(() => {
@@ -1149,7 +1070,6 @@
         googleSignUp.addEventListener('click', async function() {
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                // Add scopes if needed
                 provider.addScope('email');
                 provider.addScope('profile');
                 
@@ -1177,7 +1097,7 @@
                     showEmailStatus('Signed in successfully with Google!', 'success');
                 }
                 
-                // Redirect to dashboard or home page after successful sign-in
+                // Redirect to dashboard after successful sign-in
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1500);
@@ -1191,10 +1111,10 @@
                         errorMessage = 'Sign-in was cancelled.';
                         break;
                     case 'auth/network-request-failed':
-                        errorMessage += 'Network error. Please check your connection.';
+                        errorMessage = 'Network error. Please check your connection.';
                         break;
                     default:
-                        errorMessage += error.message;
+                        errorMessage = 'An error occurred. Please try again.';
                 }
                 
                 showEmailStatus(errorMessage, 'error');
