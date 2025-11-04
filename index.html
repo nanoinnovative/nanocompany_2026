@@ -663,7 +663,15 @@
 </head>
 <body>
   <div class="background-image"></div>
+
   <div class="overlay"></div>
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch" for="checkbox">
+      <input type="checkbox" id="checkbox" />
+      <div class="slider round"></div>
+    </label>
+  </div>
+
   
   <div class="main-container">
     <div class="hero-section">
@@ -774,28 +782,28 @@
     </div>
   </div>
 
-  <script>
-   // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<script type="module">
+    // Import Firebase v9 functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAG-0TLa4IhUXxzdz9zECkTvNa4zAKCsvg",
-  authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
-  projectId: "nanocompany-2026-34c4f",
-  storageBucket: "nanocompany-2026-34c4f.firebasestorage.app",
-  messagingSenderId: "694553917141",
-  appId: "1:694553917141:web:e9232e87caee866438945c",
-  measurementId: "G-RSDB3MJ8HP"
-};
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAl136XisbVZWuk1dXNfSWRJcq0YI34h6E",
+      authDomain: "nano-chat-ae3d9.firebaseapp.com",
+      projectId: "nano-chat-ae3d9",
+      storageBucket: "nano-chat-ae3d9.firebasestorage.app",
+      messagingSenderId: "637284077729",
+      appId: "1:637284077729:web:fa489eea640847f38de0e0e0",
+      measurementId:"G-NYSW7NTJHB",
+    };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     // Get DOM elements
     const signupForm = document.getElementById("signupForm");
     const emailInput = document.getElementById("email");
@@ -829,7 +837,7 @@ const analytics = getAnalytics(app);
     window.onRecaptchaSuccess = function() {
       console.log("reCAPTCHA verified");
       isRecaptchaVerified = true;
-      signupButton.disabled = false;
+      signupButton.disabled = !termsCheckbox.checked;
       recaptchaError.style.display = 'none';
     };
 
@@ -873,15 +881,14 @@ const analytics = getAnalytics(app);
         strengthMeter.style.backgroundColor = '#4caf50';
       }
       
-      if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+      if (password.length > 0 && (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password))) {
+        passwordError.style.display = 'block';
+        passwordInput.classList.add('error');
+        passwordInput.classList.remove('success');
+      } else {
         passwordError.style.display = 'none';
         passwordInput.classList.remove('error');
-        passwordInput.classList.add('success');
-      } else {
-        passwordInput.classList.remove('success');
-        if (password.length > 0) {
-          passwordInput.classList.add('error');
-        }
+        if(password.length > 0) passwordInput.classList.add('success');
       }
     });
 
@@ -891,7 +898,7 @@ const analytics = getAnalytics(app);
       emailStatus.className = 'email-status ' + type;
       emailStatus.style.display = 'block';
       
-      if (type === 'success') {
+      if (type === 'success' || type === 'error') {
         setTimeout(() => {
           emailStatus.style.display = 'none';
         }, 5000);
@@ -901,34 +908,25 @@ const analytics = getAnalytics(app);
     // Form validation and submission
     signupForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      console.log("Form submitted");
-      
-      if (isSubmitting) {
-        console.log("Already submitting, skipping");
-        return;
-      }
+      if (isSubmitting) return;
       
       let isValid = true;
       
-      // First name validation
-      const firstName = firstNameInput.value.trim();
-      if (firstName.length < 2) {
+      // Validations
+      if (firstNameInput.value.trim().length < 2) {
         showError(firstNameInput, document.getElementById('firstNameError'));
         isValid = false;
       } else {
         hideError(firstNameInput, document.getElementById('firstNameError'));
       }
       
-      // Last name validation
-      const lastName = lastNameInput.value.trim();
-      if (lastName.length < 2) {
+      if (lastNameInput.value.trim().length < 2) {
         showError(lastNameInput, document.getElementById('lastNameError'));
         isValid = false;
       } else {
         hideError(lastNameInput, document.getElementById('lastNameError'));
       }
       
-      // Email validation
       if (!validateEmail(emailInput.value)) {
         showError(emailInput, emailError);
         isValid = false;
@@ -936,18 +934,13 @@ const analytics = getAnalytics(app);
         hideError(emailInput, emailError);
       }
       
-      // Password validation
-      if (passwordInput.value.length < 9 || 
-          !/[a-z]/.test(passwordInput.value) || 
-          !/[A-Z]/.test(passwordInput.value) || 
-          !/[0-9]/.test(passwordInput.value)) {
+      if (passwordInput.value.length < 9 || !/[a-z]/.test(passwordInput.value) || !/[A-Z]/.test(passwordInput.value) || !/[0-9]/.test(passwordInput.value)) {
         showError(passwordInput, passwordError);
         isValid = false;
       } else {
         hideError(passwordInput, passwordError);
       }
       
-      // Confirm password validation
       if (passwordInput.value !== confirmPasswordInput.value) {
         showError(confirmPasswordInput, confirmPasswordError);
         isValid = false;
@@ -955,7 +948,6 @@ const analytics = getAnalytics(app);
         hideError(confirmPasswordInput, confirmPasswordError);
       }
       
-      // reCAPTCHA validation
       if (!isRecaptchaVerified) {
         recaptchaError.style.display = 'block';
         isValid = false;
@@ -963,7 +955,6 @@ const analytics = getAnalytics(app);
         recaptchaError.style.display = 'none';
       }
       
-      // Terms validation
       if (!termsCheckbox.checked) {
         termsError.style.display = 'block';
         isValid = false;
@@ -971,7 +962,6 @@ const analytics = getAnalytics(app);
         termsError.style.display = 'none';
       }
       
-      // If form is valid, create user with Firebase
       if (isValid) {
         isSubmitting = true;
         signupButtonText.innerHTML = '<span class="spinner"></span>Creating Account...';
@@ -981,25 +971,17 @@ const analytics = getAnalytics(app);
           const email = emailInput.value.trim();
           const password = passwordInput.value;
           
-          console.log("Creating user with email:", email);
-          
-          // Create user with Firebase Auth
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
           
-          console.log("User created:", user.uid);
+          await sendEmailVerification(user);
           
-          // Send email verification
-          await user.sendEmailVerification();
-          console.log("Verification email sent");
-          
-          // Store additional user data in Firestore
-          await db.collection('users').doc(user.uid).set({
+          await setDoc(doc(db, 'users', user.uid), {
             firstName: firstNameInput.value.trim(),
             lastName: lastNameInput.value.trim(),
             email: email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp(),
             emailVerified: false,
             profileCompleted: false,
             accountType: "free",
@@ -1009,51 +991,28 @@ const analytics = getAnalytics(app);
             }
           });
           
-          console.log("User data stored in Firestore");
-          
-          // Show verification section
           verificationEmail.textContent = email;
           showEmailStatus('Account created! Verification email sent to your inbox.', 'success');
           verificationSection.style.display = 'block';
           verificationSection.scrollIntoView({ behavior: 'smooth' });
           
-          // Reset form
           signupForm.reset();
+          grecaptcha.reset();
           isRecaptchaVerified = false;
           signupButton.disabled = true;
           
         } catch (error) {
-          console.error('Firebase error:', error);
-          let errorMessage = 'Error creating account: ';
-          
-          switch (error.code) {
-            case 'auth/email-already-in-use':
-              errorMessage = 'This email is already registered.';
-              break;
-            case 'auth/invalid-email':
-              errorMessage = 'Please enter a valid email address.';
-              break;
-            case 'auth/weak-password':
-              errorMessage = 'Password is too weak. Please use a stronger password.';
-              break;
-            case 'auth/network-request-failed':
-              errorMessage = 'Network error. Please check your internet connection.';
-              break;
-            case 'auth/operation-not-allowed':
-              errorMessage = 'Email/password accounts are not enabled. Please contact support.';
-              break;
-            default:
-              errorMessage = 'An error occurred. Please try again. Error: ' + error.message;
+          let errorMessage = 'Error creating account. Please try again.';
+          if (error.code === 'auth/email-already-in-use') {
+            errorMessage = 'This email is already registered.';
           }
-          
           showEmailStatus(errorMessage, 'error');
         } finally {
           signupButtonText.textContent = 'Create Account';
           isSubmitting = false;
-          signupButton.disabled = false;
+          // Keep button disabled until re-verified
         }
       } else {
-        // Add shake animation to form
         signupForm.style.animation = 'shake 0.5s';
         setTimeout(() => {
           signupForm.style.animation = '';
@@ -1064,136 +1023,86 @@ const analytics = getAnalytics(app);
     // Resend verification email
     resendEmail.addEventListener('click', async function(e) {
       e.preventDefault();
-      
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          await user.sendEmailVerification();
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          await sendEmailVerification(user);
           showEmailStatus('Verification email sent!', 'success');
-          
-          const originalText = resendEmail.textContent;
-          resendEmail.innerHTML = 'Email sent!';
-          setTimeout(() => {
-            resendEmail.innerHTML = 'Resend Verification Email';
-          }, 2000);
-        } else {
-          showEmailStatus('Please sign in again to resend verification email.', 'error');
+        } catch (error) {
+          showEmailStatus('Error sending verification email. Please try again.', 'error');
         }
-      } catch (error) {
-        console.error('Error resending verification email:', error);
-        showEmailStatus('Error sending verification email. Please try again.', 'error');
+      } else {
+        showEmailStatus('No active user session. Please sign in again.', 'error');
       }
     });
 
     // Google Sign-In
     googleSignUp.addEventListener('click', async function() {
+      const provider = new GoogleAuthProvider();
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        provider.addScope('profile');
-        
-        const result = await auth.signInWithPopup(provider);
+        const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        
-        // Check if user is new or existing
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        
-        if (!userDoc.exists) {
-          // New user - store in Firestore
-          await db.collection('users').doc(user.uid).set({
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          // New user
+          await setDoc(userDocRef, {
             firstName: user.displayName ? user.displayName.split(' ')[0] : '',
             lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
             email: user.email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: serverTimestamp(),
             emailVerified: user.emailVerified,
             googleSignIn: true,
-            profileCompleted: false,
+            profileCompleted: true,
             accountType: "free"
           });
-          
-          // Fill the form fields with Google data for first-time users
-          firstNameInput.value = user.displayName ? user.displayName.split(' ')[0] : '';
-          lastNameInput.value = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
-          emailInput.value = user.email;
-          
           showEmailStatus('Account created successfully with Google!', 'success');
-          
-          // Redirect to index1.html for first-time users
-          setTimeout(() => {
-            window.location.href = 'index1.html';
-          }, 1500);
         } else {
-          // Existing user - redirect to index.html
+          // Existing user
           showEmailStatus('Signed in successfully with Google!', 'success');
-          
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
         }
         
+        // Redirect after a short delay
+        setTimeout(() => {
+          window.location.href = 'index1.html'; // Redirect to a welcome/dashboard page
+        }, 1500);
+
       } catch (error) {
-        console.error('Google Sign-In error:', error);
-        let errorMessage = 'Error signing in with Google: ';
-        
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage = 'Sign-in was cancelled.';
-            break;
-          case 'auth/network-request-failed':
-            errorMessage = 'Network error. Please check your connection.';
-            break;
-          case 'auth/operation-not-allowed':
-            errorMessage = 'Google sign-in is not enabled. Please contact support.';
-            break;
-          default:
-            errorMessage = 'An error occurred. Please try again. Error: ' + error.message;
+        let errorMessage = 'Error signing in with Google. Please try again.';
+        if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = 'Sign-in was cancelled.';
         }
-        
         showEmailStatus(errorMessage, 'error');
       }
     });
 
-    // Terms and Privacy links
-    termsLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      alert('Terms of Service would be displayed here.');
-    });
+    // Links
+    termsLink.addEventListener('click', (e) => { e.preventDefault(); alert('Terms of Service would be displayed here.'); });
+    privacyLink.addEventListener('click', (e) => { e.preventDefault(); alert('Privacy Policy would be displayed here.'); });
     
-    privacyLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      alert('Privacy Policy would be displayed here.');
+    // Real-time validation helpers
+    const inputsToValidate = [
+        { input: firstNameInput, error: 'firstNameError', validate: () => firstNameInput.value.trim().length >= 2 },
+        { input: lastNameInput, error: 'lastNameError', validate: () => lastNameInput.value.trim().length >= 2 },
+        { input: emailInput, error: 'emailError', validate: () => validateEmail(emailInput.value) },
+        { input: confirmPasswordInput, error: 'confirmPasswordError', validate: () => confirmPasswordInput.value === passwordInput.value }
+    ];
+
+    inputsToValidate.forEach(({input, error, validate}) => {
+        input.addEventListener('input', () => {
+            if (validate()) {
+                hideError(input, document.getElementById(error));
+            }
+        });
     });
-    
-    // Real-time validation
-    firstNameInput.addEventListener('input', function() {
-      const firstName = this.value.trim();
-      if (firstName.length >= 2) {
-        hideError(this, document.getElementById('firstNameError'));
-      }
-    });
-    
-    lastNameInput.addEventListener('input', function() {
-      const lastName = this.value.trim();
-      if (lastName.length >= 2) {
-        hideError(this, document.getElementById('lastNameError'));
-      }
-    });
-    
-    emailInput.addEventListener('input', function() {
-      if (validateEmail(this.value)) {
-        hideError(this, emailError);
-      }
-    });
-    
-    confirmPasswordInput.addEventListener('input', function() {
-      if (this.value === passwordInput.value) {
-        hideError(this, confirmPasswordError);
-      }
-    });
-    
+
     termsCheckbox.addEventListener('change', function() {
       if (this.checked) {
         termsError.style.display = 'none';
+        signupButton.disabled = !isRecaptchaVerified;
+      } else {
+        signupButton.disabled = true;
       }
     });
     
@@ -1212,16 +1121,33 @@ const analytics = getAnalytics(app);
       }
     }
     
-    // Email validation function
     function validateEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(email);
+      return re.test(String(email).toLowerCase());
     }
 
-    // Test Firebase connection
-    console.log("Firebase auth object:", auth);
-    console.log("Firebase firestore object:", db);
+    // Dark Mode Toggle
+    const checkbox = document.getElementById('checkbox');
+    checkbox.addEventListener('change', () => {
+      document.body.classList.toggle('dark-mode');
+      // Optional: Save preference to localStorage
+      if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+      } else {
+        localStorage.removeItem('theme');
+      }
+    });
+
+    // Check for saved theme preference
+    if (localStorage.getItem('theme') === 'dark-mode') {
+      checkbox.checked = true;
+      document.body.classList.add('dark-mode');
+    }
+    
+    // Initial check to disable button
+    signupButton.disabled = true;
   </script>
 </body>
 </html>
+
 
