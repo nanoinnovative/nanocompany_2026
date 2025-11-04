@@ -1114,15 +1114,25 @@
             accountType: "free"
           });
           
+          // Fill the form fields with Google data for first-time users
+          firstNameInput.value = user.displayName ? user.displayName.split(' ')[0] : '';
+          lastNameInput.value = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
+          emailInput.value = user.email;
+          
           showEmailStatus('Account created successfully with Google!', 'success');
+          
+          // Redirect to index1.html for first-time users
+          setTimeout(() => {
+            window.location.href = 'index1.html';
+          }, 1500);
         } else {
+          // Existing user - redirect to index.html
           showEmailStatus('Signed in successfully with Google!', 'success');
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
         }
-        
-        // Redirect to dashboard after successful sign-in
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1500);
         
       } catch (error) {
         console.error('Google Sign-In error:', error);
