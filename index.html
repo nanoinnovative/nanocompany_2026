@@ -1044,6 +1044,7 @@
         const user = result.user;
         const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
+        let redirectUrl = '';
 
         if (!userDoc.exists()) {
           // New user
@@ -1058,14 +1059,16 @@
             accountType: "free"
           });
           showEmailStatus('Account created successfully with Google!', 'success');
+          redirectUrl = 'index1.html'; // Redirect to a welcome/dashboard page for new users
         } else {
           // Existing user
           showEmailStatus('Signed in successfully with Google!', 'success');
+          redirectUrl = 'CHAT.html'; // Redirect existing users to the main chat page
         }
         
         // Redirect after a short delay
         setTimeout(() => {
-          window.location.href = 'index1.html'; // Redirect to a welcome/dashboard page
+          window.location.href = redirectUrl;
         }, 1500);
 
       } catch (error) {
