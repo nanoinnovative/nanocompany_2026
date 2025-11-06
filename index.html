@@ -1418,9 +1418,32 @@
     signupButton.disabled = true;
     
     console.log('Signup form initialized successfully');
+  // Debug current domain and Firebase config
+console.log('🌐 Current Domain:', window.location.hostname);
+console.log('🔧 Firebase Auth Domain:', firebaseConfig.authDomain);
+console.log('📦 Firebase Project:', firebaseConfig.projectId);
+
+// Check if domain is authorized
+function checkDomainAuthorization() {
+    const currentDomain = window.location.hostname;
+    const authDomain = firebaseConfig.authDomain;
+    
+    console.log('🔍 Domain Check:');
+    console.log(' - Current domain:', currentDomain);
+    console.log(' - Firebase auth domain:', authDomain);
+    console.log(' - Match:', authDomain.includes(currentDomain));
+    
+    if (!authDomain.includes(currentDomain) && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1') {
+        console.log('🚨 DOMAIN NOT AUTHORIZED!');
+        console.log('💡 Solution: Add', currentDomain, 'to Firebase Authorized Domains');
+    }
+}
+
+checkDomainAuthorization();
 </script>
 </body>
 </html>
+
 
 
 
