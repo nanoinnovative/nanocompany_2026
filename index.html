@@ -177,6 +177,26 @@
     .signup-form {
       padding: 35px 30px;
     }
+    /* Add to your CSS */
+.form-control:valid {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.form-control:focus:valid {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Remove any conflicting animations */
+.form-control {
+    transition: all 0.3s ease;
+}
+
+/* Ensure error messages don't disrupt layout */
+.error-message {
+    height: 20px;
+    margin-top: 5px;
+    font-size: 12px;
+}
     
     .form-row {
       display: flex;
@@ -1170,92 +1190,234 @@ googleSignUp.addEventListener('click', async function() {
     }
 });
     // Helper functions
-    function showError(input, errorElement) {
-      errorElement.style.display = 'block';
-      input.classList.add('error');
-      input.classList.remove('success');
+    // Real-time validation helpers - SIMPLIFIED
+firstNameInput.addEventListener('input', function() {
+    const name = this.value.trim();
+    if (name.length >= 2 && /^[a-zA-Z\s'-]+$/.test(name)) {
+        hideError(this, document.getElementById('firstNameError'));
+        this.classList.add('success');
+        this.classList.remove('error');
+    } else if (name.length > 0) {
+        showError(this, document.getElementById('firstNameError'));
+        document.getElementById('firstNameError').textContent = 'Please enter a valid name (letters only)';
+    } else {
+        hideError(this, document.getElementById('firstNameError'));
+        this.classList.remove('success', 'error');
+    }
+    checkFormValidity();
+});
+
+lastNameInput.addEventListener('input', function() {
+    const name = this.value.trim();
+    if (name.length >= 2 && /^[a-zA-Z\s'-]+$/.test(name)) {
+        hideError(this, document.getElementById('lastNameError'));
+        this.classList.add('success');
+        this.classList.remove('error');
+    } else if (name.length > 0) {
+        showError(this, document.getElementById('lastNameError'));
+        document.getElementById('lastNameError').textContent = 'Please enter a valid name (letters only)';
+    } else {
+        hideError(this, document.getElementById('lastNameError'));
+        this.classList.remove('success', 'error');
+    }
+    checkFormValidity();
+});
+
+emailInput.addEventListener('input', function() {
+    const email = this.value.trim();
+    if (validateEmail(email)) {
+        hideError(this, emailError);
+        this.classList.add('success');
+        this.classList.remove('error');
+    } else if (email.length > 0) {
+        showError(this, emailError);
+    } else {
+        hideError(this, emailError);
+        this.classList.remove('success', 'error');
+    }
+    checkFormValidity();
+});
+
+passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    
+    // Password strength meter
+    let strength = 0;
+    if (password.length >= 9) strength += 25;
+    if (/[a-z]/.test(password)) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password)) strength += 25;
+    
+    strengthMeter.style.width = strength + '%';
+    
+    if (strength < 50) {
+        strengthMeter.style.backgroundColor = '#d32f2f';
+    } else if (strength < 75) {
+        strengthMeter.style.backgroundColor = '#ff9800';
+    } else {
+        strengthMeter.style.backgroundColor = '#4caf50';
     }
     
-    function hideError(input, errorElement) {
-      errorElement.style.display = 'none';
-      input.classList.remove('error');
-      if (input.value.trim() !== '') {
-        input.classList.add('success');
-      }
+    // Validation
+    if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+        hideError(this, passwordError);
+        this.classList.add('success');
+        this.classList.remove('error');
+    } else if (password.length > 0) {
+        showError(this, passwordError);
+    } else {
+        hideError(this, passwordError);
+        this.classList.remove('success', 'error');
+        strengthMeter.style.width = '0%';
     }
     
-    function validateEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(String(email).toLowerCase());
+    // Also validate confirm password when password changes
+    if (confirmPasswordInput.value.length > 0) {
+        if (confirmPasswordInput.value === password) {
+            hideError(confirmPasswordInput, confirmPasswordError);
+            confirmPasswordInput.classList.add('success');
+            confirmPasswordInput.classList.remove('error');
+        } else {
+            showError(confirmPasswordInput, confirmPasswordError);
+        }
     }
     
-    // Enhanced validation function for form submission - FIXED
-    function validateAllFields() {
-      let isValid = true;
-      
-      // Validate first name
-      const firstName = firstNameInput.value.trim();
-      if (firstName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(firstName)) {
+    checkFormValidity();
+});
+
+confirmPasswordInput.addEventListener('input', function() {
+    const confirmPassword = this.value;
+    const password = passwordInput.value;
+    
+    if (confirmPassword === password && password.length > 0) {
+        hideError(this, confirmPasswordError);
+        this.classList.add('success');
+        this.classList.remove('error');
+    } else if (confirmPassword.length > 0) {
+        showError(this, confirmPasswordError);
+    } else {
+        hideError(this, confirmPasswordError);
+        this.classList.remove('success', 'error');
+    }
+    checkFormValidity();
+});
+
+termsCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+        termsError.style.display = 'none';
+    } else {
+        termsError.style.display = 'block';
+    }
+    checkFormValidity();
+});
+
+// Simplified validation function
+function validateAllFields() {
+    const firstName = firstNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    let isValid = true;
+    
+    // First Name validation
+    if (firstName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(firstName)) {
         showError(firstNameInput, document.getElementById('firstNameError'));
         isValid = false;
-      } else {
-        hideError(firstNameInput, document.getElementById('firstNameError'));
-      }
-      
-      // Validate last name
-      const lastName = lastNameInput.value.trim();
-      if (lastName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(lastName)) {
+    }
+    
+    // Last Name validation
+    if (lastName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(lastName)) {
         showError(lastNameInput, document.getElementById('lastNameError'));
         isValid = false;
-      } else {
-        hideError(lastNameInput, document.getElementById('lastNameError'));
-      }
-      
-      // Validate email
-      const email = emailInput.value.trim();
-      if (!validateEmail(email)) {
+    }
+    
+    // Email validation
+    if (!validateEmail(email)) {
         showError(emailInput, emailError);
         isValid = false;
-      } else {
-        hideError(emailInput, emailError);
-      }
-      
-      // Validate password
-      const password = passwordInput.value;
-      if (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    }
+    
+    // Password validation
+    if (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
         showError(passwordInput, passwordError);
         isValid = false;
-      } else {
-        hideError(passwordInput, passwordError);
-      }
-      
-      // Validate confirm password
-      if (confirmPasswordInput.value !== password) {
+    }
+    
+    // Confirm Password validation
+    if (confirmPassword !== password) {
         showError(confirmPasswordInput, confirmPasswordError);
         isValid = false;
-      } else {
-        hideError(confirmPasswordInput, confirmPasswordError);
-      }
-      
-      // Validate reCAPTCHA
-      if (!isRecaptchaVerified) {
+    }
+    
+    // reCAPTCHA validation
+    if (!isRecaptchaVerified) {
         recaptchaError.style.display = 'block';
         isValid = false;
-      } else {
+    } else {
         recaptchaError.style.display = 'none';
-      }
-      
-      // Validate terms
-      if (!termsCheckbox.checked) {
+    }
+    
+    // Terms validation
+    if (!termsCheckbox.checked) {
         termsError.style.display = 'block';
         isValid = false;
-      } else {
+    } else {
         termsError.style.display = 'none';
-      }
-      
-      console.log('Form validation result:', isValid);
-      return isValid;
     }
+    
+    return isValid;
+}
+
+// Simplified form validity check
+function checkFormValidity() {
+    const firstName = firstNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    const isFormValid = 
+        firstName.length >= 2 &&
+        /^[a-zA-Z\s'-]+$/.test(firstName) &&
+        lastName.length >= 2 &&
+        /^[a-zA-Z\s'-]+$/.test(lastName) &&
+        validateEmail(email) &&
+        password.length >= 9 &&
+        /[a-z]/.test(password) &&
+        /[A-Z]/.test(password) &&
+        /[0-9]/.test(password) &&
+        confirmPassword === password &&
+        termsCheckbox.checked &&
+        isRecaptchaVerified;
+    
+    signupButton.disabled = !isFormValid || isSubmitting;
+}
+
+// Helper functions
+function showError(input, errorElement) {
+    if (errorElement) {
+        errorElement.style.display = 'block';
+    }
+    input.classList.add('error');
+    input.classList.remove('success');
+}
+
+function hideError(input, errorElement) {
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
+    input.classList.remove('error');
+    if (input.value.trim() !== '') {
+        input.classList.add('success');
+    }
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+}
 
     // Function to check if form is valid and enable/disable submit button
     function checkFormValidity() {
@@ -1320,4 +1482,5 @@ console.log('GoogleAuthProvider:', GoogleAuthProvider);
 </script>
 </body>
 </html>
+
 
