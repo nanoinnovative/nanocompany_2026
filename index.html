@@ -147,6 +147,16 @@
       backdrop-filter: blur(15px);
       border: 1px solid var(--glass-border);
     }
+    /* Add this to your CSS to ensure inputs work */
+.form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
     
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -819,7 +829,7 @@
     // Import Firebase v9 functions
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -893,39 +903,6 @@
       confirmPasswordInput.setAttribute('type', type);
       this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
     });
-    
-    // Password strength indicator
-    passwordInput.addEventListener('input', function() {
-      const password = this.value;
-      let strength = 0;
-      
-      if (password.length >= 9) strength += 25;
-      if (/[a-z]/.test(password)) strength += 25;
-      if (/[A-Z]/.test(password)) strength += 25;
-      if (/[0-9]/.test(password)) strength += 25;
-      
-      strengthMeter.style.width = strength + '%';
-      
-      if (strength < 50) {
-        strengthMeter.style.backgroundColor = '#d32f2f';
-      } else if (strength < 75) {
-        strengthMeter.style.backgroundColor = '#ff9800';
-      } else {
-        strengthMeter.style.backgroundColor = '#4caf50';
-      }
-      
-      if (password.length > 0 && (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password))) {
-        passwordError.style.display = 'block';
-        passwordInput.classList.add('error');
-        passwordInput.classList.remove('success');
-      } else {
-        passwordError.style.display = 'none';
-        passwordInput.classList.remove('error');
-        if(password.length > 0) passwordInput.classList.add('success');
-      }
-      
-      checkFormValidity();
-    });
 
     // Show email sending status
     function showEmailStatus(message, type) {
@@ -940,547 +917,500 @@
       }
     }
 
-    // Form validation and submission - FIXED VERSION
-    signupForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      console.log('Form submission started');
-      
-      if (isSubmitting) {
-        console.log('Already submitting, ignoring');
-        return;
+    // Helper functions
+    function showError(input, errorElement) {
+      if (errorElement) {
+        errorElement.style.display = 'block';
       }
-      
-      // Validate all fields before submission
-      if (!validateAllFields()) {
-        console.log('Form validation failed');
-        signupForm.style.animation = 'shake 0.5s';
-        setTimeout(() => {
-          signupForm.style.animation = '';
-        }, 500);
-        return;
+      input.classList.add('error');
+      input.classList.remove('success');
+    }
+    
+    function hideError(input, errorElement) {
+      if (errorElement) {
+        errorElement.style.display = 'none';
       }
-      
-      console.log('Form validation passed, starting submission');
-      isSubmitting = true;
-      
-      // Update button state
-      signupButton.innerHTML = '<span class="loading-spinner"></span> Creating Account...';
-      signupButton.disabled = true;
-      signupButton.style.opacity = '0.7';
-      
-      try {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+      input.classList.remove('error');
+      if (input.value.trim() !== '') {
+        input.classList.add('success');
+      }
+    }
+    
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(String(email).toLowerCase());
+    }
+
+    // Form validation function
+    function validateAllFields() {
         const firstName = firstNameInput.value.trim();
         const lastName = lastNameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
         
-        console.log('Creating account for:', email);
+        let isValid = true;
         
-        // Create user account
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        console.log('User created:', user.uid);
-        
-        // Send verification email
-        await sendEmailVerification(user);
-        console.log('Verification email sent');
-        
-        // Create user document in Firestore
-        await setDoc(doc(db, 'users', user.uid), {
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp(),
-          emailVerified: false,
-          profileCompleted: false,
-          accountType: "free",
-          preferences: {
-            newsletter: true,
-            notifications: true
-          }
-        });
-        console.log('User document created');
-        
-        // Show success message and verification section
-        verificationEmail.textContent = email;
-        showEmailStatus('Account created successfully! Please check your email for verification.', 'success');
-        verificationSection.style.display = 'block';
-        verificationSection.scrollIntoView({ behavior: 'smooth' });
-        
-        // Clear form and reset UI
-        signupForm.reset();
-        if (window.grecaptcha) {
-          grecaptcha.reset();
-        }
-        isRecaptchaVerified = false;
-        strengthMeter.style.width = '0%';
-        
-        // Reset field styling
-        [firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
-          input.classList.remove('success', 'error');
-        });
-        
-        console.log('Account creation process completed successfully');
-        
-      } catch (error) {
-        console.error('Error during signup:', error);
-        let errorMessage = 'An error occurred during signup. Please try again.';
-        
-        // Enhanced error handling with specific messages
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = 'This email is already registered. Please sign in or use a different email.';
-            emailInput.classList.add('error');
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Please enter a valid email address.';
-            emailInput.classList.add('error');
-            break;
-          case 'auth/weak-password':
-            errorMessage = 'Password is too weak. Please choose a stronger password (at least 9 characters with uppercase, lowercase, and numbers).';
-            passwordInput.classList.add('error');
-            break;
-          case 'auth/network-request-failed':
-            errorMessage = 'Network error. Please check your connection and try again.';
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = 'Too many attempts. Please try again later.';
-            break;
-          case 'auth/operation-not-allowed':
-            errorMessage = 'Email/password sign-up is not enabled. Please contact support.';
-            break;
-          default:
-            errorMessage = `Sign-up failed: ${error.message}`;
-        }
-        
-        showEmailStatus(errorMessage, 'error');
-        
-        // Reset reCAPTCHA on error
-        if (window.grecaptcha) {
-          grecaptcha.reset();
-        }
-        isRecaptchaVerified = false;
-        
-      } finally {
-        // Always reset button state
-        signupButton.innerHTML = '<span id="signupButtonText">Create Account</span>';
-        signupButton.style.opacity = '1';
-        isSubmitting = false;
-        checkFormValidity(); // Re-enable button based on current form state
-        console.log('Form submission process ended');
-      }
-    });
-
-    // Resend verification email
-    resendEmail.addEventListener('click', async function(e) {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          await sendEmailVerification(user);
-          showEmailStatus('Verification email sent!', 'success');
-        } catch (error) {
-          showEmailStatus('Error sending verification email. Please try again.', 'error');
-        }
-      } else {
-        showEmailStatus('No active user session. Please sign in again.', 'error');
-      }
-    });
-
-    // Google Sign-In (keep your existing implementation)
-    // Google Sign-In - SIMPLIFIED AND CORRECTED VERSION
-googleSignUp.addEventListener('click', async function() {
-    console.log('Google Sign-In button clicked');
-    
-    // Store original button state
-    const originalContent = this.innerHTML;
-    const originalText = this.textContent;
-    
-    // Show loading state
-    this.innerHTML = '<i class="fab fa-google google-icon"></i> Connecting...';
-    this.disabled = true;
-    
-    try {
-        // Create Google Auth Provider
-        const provider = new GoogleAuthProvider();
-        
-        // Add scopes
-        provider.addScope('email');
-        provider.addScope('profile');
-        
-        console.log('Starting Google sign-in popup...');
-        
-        // Sign in with popup
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        
-        console.log('Google sign-in successful:', user.email);
-        
-        // Check if user already exists in Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (!userDoc.exists()) {
-            // New user - create document
-            console.log('Creating new user document...');
-            await setDoc(userDocRef, {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || '',
-                firstName: user.displayName ? user.displayName.split(' ')[0] : '',
-                lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
-                photoURL: user.photoURL || '',
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp(),
-                emailVerified: user.emailVerified,
-                provider: 'google',
-                accountType: 'free',
-                profileCompleted: true
-            });
-            console.log('New user document created');
-            
-            showEmailStatus('🎉 Welcome! Account created successfully!', 'success');
+        // First Name validation
+        if (firstName.length < 2) {
+            showError(firstNameInput, document.getElementById('firstNameError'));
+            isValid = false;
         } else {
-            // Existing user - update last login
-            console.log('Updating existing user...');
-            await setDoc(userDocRef, {
-                lastLogin: serverTimestamp()
-            }, { merge: true });
-            
-            showEmailStatus('👋 Welcome back! Signed in successfully!', 'success');
+            hideError(firstNameInput, document.getElementById('firstNameError'));
         }
         
-        // Redirect after successful sign-in
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Change this to your desired redirect page
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Google Sign-In Error:', error);
-        
-        let errorMessage = 'Google Sign-In failed. Please try again.';
-        
-        switch (error.code) {
-            case 'auth/popup-closed-by-user':
-                errorMessage = 'Sign-in was cancelled.';
-                break;
-            case 'auth/popup-blocked':
-                errorMessage = 'Sign-in popup was blocked. Please allow popups for this site.';
-                break;
-            case 'auth/network-request-failed':
-                errorMessage = 'Network error. Please check your internet connection.';
-                break;
-            case 'auth/operation-not-allowed':
-                errorMessage = 'Google Sign-In is not enabled. Please contact support.';
-                break;
-            case 'auth/configuration-not-found':
-                errorMessage = 'Google Sign-In is not properly configured.';
-                break;
-            default:
-                errorMessage = `Sign-in failed: ${error.message}`;
-        }
-        
-        showEmailStatus(errorMessage, 'error');
-        
-    } finally {
-        // Restore button state
-        this.innerHTML = originalContent;
-        this.disabled = false;
-    }
-});
-    // Helper functions
-    // Real-time validation helpers - SIMPLIFIED
-firstNameInput.addEventListener('input', function() {
-    const name = this.value.trim();
-    if (name.length >= 2 && /^[a-zA-Z\s'-]+$/.test(name)) {
-        hideError(this, document.getElementById('firstNameError'));
-        this.classList.add('success');
-        this.classList.remove('error');
-    } else if (name.length > 0) {
-        showError(this, document.getElementById('firstNameError'));
-        document.getElementById('firstNameError').textContent = 'Please enter a valid name (letters only)';
-    } else {
-        hideError(this, document.getElementById('firstNameError'));
-        this.classList.remove('success', 'error');
-    }
-    checkFormValidity();
-});
-
-lastNameInput.addEventListener('input', function() {
-    const name = this.value.trim();
-    if (name.length >= 2 && /^[a-zA-Z\s'-]+$/.test(name)) {
-        hideError(this, document.getElementById('lastNameError'));
-        this.classList.add('success');
-        this.classList.remove('error');
-    } else if (name.length > 0) {
-        showError(this, document.getElementById('lastNameError'));
-        document.getElementById('lastNameError').textContent = 'Please enter a valid name (letters only)';
-    } else {
-        hideError(this, document.getElementById('lastNameError'));
-        this.classList.remove('success', 'error');
-    }
-    checkFormValidity();
-});
-
-emailInput.addEventListener('input', function() {
-    const email = this.value.trim();
-    if (validateEmail(email)) {
-        hideError(this, emailError);
-        this.classList.add('success');
-        this.classList.remove('error');
-    } else if (email.length > 0) {
-        showError(this, emailError);
-    } else {
-        hideError(this, emailError);
-        this.classList.remove('success', 'error');
-    }
-    checkFormValidity();
-});
-
-passwordInput.addEventListener('input', function() {
-    const password = this.value;
-    
-    // Password strength meter
-    let strength = 0;
-    if (password.length >= 9) strength += 25;
-    if (/[a-z]/.test(password)) strength += 25;
-    if (/[A-Z]/.test(password)) strength += 25;
-    if (/[0-9]/.test(password)) strength += 25;
-    
-    strengthMeter.style.width = strength + '%';
-    
-    if (strength < 50) {
-        strengthMeter.style.backgroundColor = '#d32f2f';
-    } else if (strength < 75) {
-        strengthMeter.style.backgroundColor = '#ff9800';
-    } else {
-        strengthMeter.style.backgroundColor = '#4caf50';
-    }
-    
-    // Validation
-    if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-        hideError(this, passwordError);
-        this.classList.add('success');
-        this.classList.remove('error');
-    } else if (password.length > 0) {
-        showError(this, passwordError);
-    } else {
-        hideError(this, passwordError);
-        this.classList.remove('success', 'error');
-        strengthMeter.style.width = '0%';
-    }
-    
-    // Also validate confirm password when password changes
-    if (confirmPasswordInput.value.length > 0) {
-        if (confirmPasswordInput.value === password) {
-            hideError(confirmPasswordInput, confirmPasswordError);
-            confirmPasswordInput.classList.add('success');
-            confirmPasswordInput.classList.remove('error');
+        // Last Name validation
+        if (lastName.length < 2) {
+            showError(lastNameInput, document.getElementById('lastNameError'));
+            isValid = false;
         } else {
+            hideError(lastNameInput, document.getElementById('lastNameError'));
+        }
+        
+        // Email validation
+        if (!validateEmail(email)) {
+            showError(emailInput, emailError);
+            isValid = false;
+        } else {
+            hideError(emailInput, emailError);
+        }
+        
+        // Password validation
+        if (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+            showError(passwordInput, passwordError);
+            isValid = false;
+        } else {
+            hideError(passwordInput, passwordError);
+        }
+        
+        // Confirm Password validation
+        if (confirmPassword !== password) {
             showError(confirmPasswordInput, confirmPasswordError);
+            isValid = false;
+        } else {
+            hideError(confirmPasswordInput, confirmPasswordError);
         }
+        
+        // reCAPTCHA validation
+        if (!isRecaptchaVerified) {
+            recaptchaError.style.display = 'block';
+            isValid = false;
+        } else {
+            recaptchaError.style.display = 'none';
+        }
+        
+        // Terms validation
+        if (!termsCheckbox.checked) {
+            termsError.style.display = 'block';
+            isValid = false;
+        } else {
+            termsError.style.display = 'none';
+        }
+        
+        return isValid;
     }
-    
-    checkFormValidity();
-});
-
-confirmPasswordInput.addEventListener('input', function() {
-    const confirmPassword = this.value;
-    const password = passwordInput.value;
-    
-    if (confirmPassword === password && password.length > 0) {
-        hideError(this, confirmPasswordError);
-        this.classList.add('success');
-        this.classList.remove('error');
-    } else if (confirmPassword.length > 0) {
-        showError(this, confirmPasswordError);
-    } else {
-        hideError(this, confirmPasswordError);
-        this.classList.remove('success', 'error');
-    }
-    checkFormValidity();
-});
-
-termsCheckbox.addEventListener('change', function() {
-    if (this.checked) {
-        termsError.style.display = 'none';
-    } else {
-        termsError.style.display = 'block';
-    }
-    checkFormValidity();
-});
-
-// Simplified validation function
-function validateAllFields() {
-    const firstName = firstNameInput.value.trim();
-    const lastName = lastNameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
-    
-    let isValid = true;
-    
-    // First Name validation
-    if (firstName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(firstName)) {
-        showError(firstNameInput, document.getElementById('firstNameError'));
-        isValid = false;
-    }
-    
-    // Last Name validation
-    if (lastName.length < 2 || !/^[a-zA-Z\s'-]+$/.test(lastName)) {
-        showError(lastNameInput, document.getElementById('lastNameError'));
-        isValid = false;
-    }
-    
-    // Email validation
-    if (!validateEmail(email)) {
-        showError(emailInput, emailError);
-        isValid = false;
-    }
-    
-    // Password validation
-    if (password.length < 9 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-        showError(passwordInput, passwordError);
-        isValid = false;
-    }
-    
-    // Confirm Password validation
-    if (confirmPassword !== password) {
-        showError(confirmPasswordInput, confirmPasswordError);
-        isValid = false;
-    }
-    
-    // reCAPTCHA validation
-    if (!isRecaptchaVerified) {
-        recaptchaError.style.display = 'block';
-        isValid = false;
-    } else {
-        recaptchaError.style.display = 'none';
-    }
-    
-    // Terms validation
-    if (!termsCheckbox.checked) {
-        termsError.style.display = 'block';
-        isValid = false;
-    } else {
-        termsError.style.display = 'none';
-    }
-    
-    return isValid;
-}
-
-// Simplified form validity check
-function checkFormValidity() {
-    const firstName = firstNameInput.value.trim();
-    const lastName = lastNameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
-    
-    const isFormValid = 
-        firstName.length >= 2 &&
-        /^[a-zA-Z\s'-]+$/.test(firstName) &&
-        lastName.length >= 2 &&
-        /^[a-zA-Z\s'-]+$/.test(lastName) &&
-        validateEmail(email) &&
-        password.length >= 9 &&
-        /[a-z]/.test(password) &&
-        /[A-Z]/.test(password) &&
-        /[0-9]/.test(password) &&
-        confirmPassword === password &&
-        termsCheckbox.checked &&
-        isRecaptchaVerified;
-    
-    signupButton.disabled = !isFormValid || isSubmitting;
-}
-
-// Helper functions
-function showError(input, errorElement) {
-    if (errorElement) {
-        errorElement.style.display = 'block';
-    }
-    input.classList.add('error');
-    input.classList.remove('success');
-}
-
-function hideError(input, errorElement) {
-    if (errorElement) {
-        errorElement.style.display = 'none';
-    }
-    input.classList.remove('error');
-    if (input.value.trim() !== '') {
-        input.classList.add('success');
-    }
-}
-
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-}
 
     // Function to check if form is valid and enable/disable submit button
     function checkFormValidity() {
+        const firstName = firstNameInput.value.trim();
+        const lastName = lastNameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
         const isFormValid = 
-            firstNameInput.value.trim().length >= 2 &&
-            /^[a-zA-Z\s'-]+$/.test(firstNameInput.value.trim()) &&
-            lastNameInput.value.trim().length >= 2 &&
-            /^[a-zA-Z\s'-]+$/.test(lastNameInput.value.trim()) &&
-            validateEmail(emailInput.value) &&
-            passwordInput.value.length >= 9 &&
-            /[a-z]/.test(passwordInput.value) &&
-            /[A-Z]/.test(passwordInput.value) &&
-            /[0-9]/.test(passwordInput.value) &&
-            confirmPasswordInput.value === passwordInput.value &&
+            firstName.length >= 2 &&
+            lastName.length >= 2 &&
+            validateEmail(email) &&
+            password.length >= 9 &&
+            /[a-z]/.test(password) &&
+            /[A-Z]/.test(password) &&
+            /[0-9]/.test(password) &&
+            confirmPassword === password &&
             termsCheckbox.checked &&
             isRecaptchaVerified;
         
         signupButton.disabled = !isFormValid || isSubmitting;
-        console.log('Button state - disabled:', signupButton.disabled, 'isSubmitting:', isSubmitting);
     }
-    
-    // Add event listeners for real-time form validation
-    [firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
-        input.addEventListener('input', checkFormValidity);
-        input.addEventListener('change', checkFormValidity);
-        input.addEventListener('blur', checkFormValidity);
+
+    // Real-time validation
+    firstNameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        if (name.length >= 2) {
+            hideError(this, document.getElementById('firstNameError'));
+            this.classList.add('success');
+            this.classList.remove('error');
+        } else if (name.length > 0) {
+            showError(this, document.getElementById('firstNameError'));
+        } else {
+            hideError(this, document.getElementById('firstNameError'));
+            this.classList.remove('success', 'error');
+        }
+        checkFormValidity();
     });
-    
+
+    lastNameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        if (name.length >= 2) {
+            hideError(this, document.getElementById('lastNameError'));
+            this.classList.add('success');
+            this.classList.remove('error');
+        } else if (name.length > 0) {
+            showError(this, document.getElementById('lastNameError'));
+        } else {
+            hideError(this, document.getElementById('lastNameError'));
+            this.classList.remove('success', 'error');
+        }
+        checkFormValidity();
+    });
+
+    emailInput.addEventListener('input', function() {
+        const email = this.value.trim();
+        if (validateEmail(email)) {
+            hideError(this, emailError);
+            this.classList.add('success');
+            this.classList.remove('error');
+        } else if (email.length > 0) {
+            showError(this, emailError);
+        } else {
+            hideError(this, emailError);
+            this.classList.remove('success', 'error');
+        }
+        checkFormValidity();
+    });
+
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        // Password strength meter
+        let strength = 0;
+        if (password.length >= 9) strength += 25;
+        if (/[a-z]/.test(password)) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        
+        strengthMeter.style.width = strength + '%';
+        
+        if (strength < 50) {
+            strengthMeter.style.backgroundColor = '#d32f2f';
+        } else if (strength < 75) {
+            strengthMeter.style.backgroundColor = '#ff9800';
+        } else {
+            strengthMeter.style.backgroundColor = '#4caf50';
+        }
+        
+        // Validation
+        if (password.length >= 9 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+            hideError(this, passwordError);
+            this.classList.add('success');
+            this.classList.remove('error');
+        } else if (password.length > 0) {
+            showError(this, passwordError);
+        } else {
+            hideError(this, passwordError);
+            this.classList.remove('success', 'error');
+            strengthMeter.style.width = '0%';
+        }
+        
+        // Also validate confirm password when password changes
+        if (confirmPasswordInput.value.length > 0) {
+            if (confirmPasswordInput.value === password) {
+                hideError(confirmPasswordInput, confirmPasswordError);
+                confirmPasswordInput.classList.add('success');
+                confirmPasswordInput.classList.remove('error');
+            } else {
+                showError(confirmPasswordInput, confirmPasswordError);
+            }
+        }
+        
+        checkFormValidity();
+    });
+
+    confirmPasswordInput.addEventListener('input', function() {
+        const confirmPassword = this.value;
+        const password = passwordInput.value;
+        
+        if (confirmPassword === password && password.length > 0) {
+            hideError(this, confirmPasswordError);
+            this.classList.add('success');
+            this.classList.remove('error');
+        } else if (confirmPassword.length > 0) {
+            showError(this, confirmPasswordError);
+        } else {
+            hideError(this, confirmPasswordError);
+            this.classList.remove('success', 'error');
+        }
+        checkFormValidity();
+    });
+
     termsCheckbox.addEventListener('change', function() {
-      if (this.checked) {
-        termsError.style.display = 'none';
-      }
-      checkFormValidity();
+        if (this.checked) {
+            termsError.style.display = 'none';
+        } else {
+            termsError.style.display = 'block';
+        }
+        checkFormValidity();
     });
+
+    // Form submission
+    signupForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('Form submission started');
+        
+        if (isSubmitting) {
+            console.log('Already submitting, ignoring');
+            return;
+        }
+        
+        // Validate all fields before submission
+        if (!validateAllFields()) {
+            console.log('Form validation failed');
+            signupForm.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                signupForm.style.animation = '';
+            }, 500);
+            return;
+        }
+        
+        console.log('Form validation passed, starting submission');
+        isSubmitting = true;
+        
+        // Update button state
+        signupButton.innerHTML = '<span class="loading-spinner"></span> Creating Account...';
+        signupButton.disabled = true;
+        signupButton.style.opacity = '0.7';
+        
+        try {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const firstName = firstNameInput.value.trim();
+            const lastName = lastNameInput.value.trim();
+            
+            console.log('Creating account for:', email);
+            
+            // Create user account
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            console.log('User created:', user.uid);
+            
+            // Send verification email
+            await sendEmailVerification(user);
+            console.log('Verification email sent');
+            
+            // Create user document in Firestore
+            await setDoc(doc(db, 'users', user.uid), {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                createdAt: serverTimestamp(),
+                lastLogin: serverTimestamp(),
+                emailVerified: false,
+                profileCompleted: false,
+                accountType: "free",
+                preferences: {
+                    newsletter: true,
+                    notifications: true
+                }
+            });
+            console.log('User document created');
+            
+            // Show success message and verification section
+            verificationEmail.textContent = email;
+            showEmailStatus('Account created successfully! Please check your email for verification.', 'success');
+            verificationSection.style.display = 'block';
+            verificationSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Clear form and reset UI
+            signupForm.reset();
+            if (window.grecaptcha) {
+                grecaptcha.reset();
+            }
+            isRecaptchaVerified = false;
+            strengthMeter.style.width = '0%';
+            
+            // Reset field styling
+            [firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
+                input.classList.remove('success', 'error');
+            });
+            
+            console.log('Account creation process completed successfully');
+            
+        } catch (error) {
+            console.error('Error during signup:', error);
+            let errorMessage = 'An error occurred during signup. Please try again.';
+            
+            // Enhanced error handling with specific messages
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = 'This email is already registered. Please sign in or use a different email.';
+                    emailInput.classList.add('error');
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Please enter a valid email address.';
+                    emailInput.classList.add('error');
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = 'Password is too weak. Please choose a stronger password (at least 9 characters with uppercase, lowercase, and numbers).';
+                    passwordInput.classList.add('error');
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'Too many attempts. Please try again later.';
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = 'Email/password sign-up is not enabled. Please contact support.';
+                    break;
+                default:
+                    errorMessage = `Sign-up failed: ${error.message}`;
+            }
+            
+            showEmailStatus(errorMessage, 'error');
+            
+            // Reset reCAPTCHA on error
+            if (window.grecaptcha) {
+                grecaptcha.reset();
+            }
+            isRecaptchaVerified = false;
+            
+        } finally {
+            // Always reset button state
+            signupButton.innerHTML = '<span id="signupButtonText">Create Account</span>';
+            signupButton.style.opacity = '1';
+            isSubmitting = false;
+            checkFormValidity();
+            console.log('Form submission process ended');
+        }
+    });
+
+    // Resend verification email
+    resendEmail.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                await sendEmailVerification(user);
+                showEmailStatus('Verification email sent!', 'success');
+            } catch (error) {
+                showEmailStatus('Error sending verification email. Please try again.', 'error');
+            }
+        } else {
+            showEmailStatus('No active user session. Please sign in again.', 'error');
+        }
+    });
+
+    // Google Sign-In
+    googleSignUp.addEventListener('click', async function() {
+        console.log('Google Sign-In button clicked');
+        
+        // Store original button state
+        const originalContent = this.innerHTML;
+        
+        // Show loading state
+        this.innerHTML = '<i class="fab fa-google google-icon"></i> Connecting...';
+        this.disabled = true;
+        
+        try {
+            // Create Google Auth Provider
+            const provider = new GoogleAuthProvider();
+            
+            // Add scopes
+            provider.addScope('email');
+            provider.addScope('profile');
+            
+            console.log('Starting Google sign-in popup...');
+            
+            // Sign in with popup
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            console.log('Google sign-in successful:', user.email);
+            
+            // Check if user already exists in Firestore
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            
+            if (!userDoc.exists()) {
+                // New user - create document
+                console.log('Creating new user document...');
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    firstName: user.displayName ? user.displayName.split(' ')[0] : '',
+                    lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+                    photoURL: user.photoURL || '',
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                    emailVerified: user.emailVerified,
+                    provider: 'google',
+                    accountType: 'free',
+                    profileCompleted: true
+                });
+                console.log('New user document created');
+                
+                showEmailStatus('🎉 Welcome! Account created successfully!', 'success');
+            } else {
+                // Existing user - update last login
+                console.log('Updating existing user...');
+                await setDoc(userDocRef, {
+                    lastLogin: serverTimestamp()
+                }, { merge: true });
+                
+                showEmailStatus('👋 Welcome back! Signed in successfully!', 'success');
+            }
+            
+            // Redirect after successful sign-in
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Google Sign-In Error:', error);
+            
+            let errorMessage = 'Google Sign-In failed. Please try again.';
+            
+            switch (error.code) {
+                case 'auth/popup-closed-by-user':
+                    errorMessage = 'Sign-in was cancelled.';
+                    break;
+                case 'auth/popup-blocked':
+                    errorMessage = 'Sign-in popup was blocked. Please allow popups for this site.';
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'Network error. Please check your internet connection.';
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = 'Google Sign-In is not enabled. Please contact support.';
+                    break;
+                case 'auth/configuration-not-found':
+                    errorMessage = 'Google Sign-In is not properly configured.';
+                    break;
+                default:
+                    errorMessage = `Sign-in failed: ${error.message}`;
+            }
+            
+            showEmailStatus(errorMessage, 'error');
+            
+        } finally {
+            // Restore button state
+            this.innerHTML = originalContent;
+            this.disabled = false;
+        }
+    });
+
+    // Links
+    termsLink.addEventListener('click', (e) => { e.preventDefault(); alert('Terms of Service would be displayed here.'); });
+    privacyLink.addEventListener('click', (e) => { e.preventDefault(); alert('Privacy Policy would be displayed here.'); });
 
     // Initial check to disable button
     signupButton.disabled = true;
     
-    // Add console logging for debugging
     console.log('Signup form initialized successfully');
-  // Add this function to check Firebase configuration
-function checkFirebaseConfig() {
-    console.log('=== FIREBASE CONFIGURATION CHECK ===');
-    console.log('Project ID:', firebaseConfig.projectId);
-    console.log('Auth Domain:', firebaseConfig.authDomain);
-    console.log('API Key:', firebaseConfig.apiKey ? '✓ Present' : '✗ Missing');
-    console.log('App ID:', firebaseConfig.appId ? '✓ Present' : '✗ Missing');
-    
-    // Check if domains are authorized
-    const currentDomain = window.location.hostname;
-    console.log('Current domain:', currentDomain);
-    console.log('Auth domain matches:', firebaseConfig.authDomain.includes(currentDomain));
-    
-    console.log('=== FIREBASE CONFIGURATION CHECK END ===');
-}
-
-// Call this function when the page loads
-checkFirebaseConfig();
-  // Test Firebase in browser console
-console.log('Firebase Auth:', auth);
-console.log('GoogleAuthProvider:', GoogleAuthProvider);
 </script>
 </body>
 </html>
+
 
 
