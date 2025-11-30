@@ -10,9 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Clash+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Firebase (compat) -->
-
-
   <!-- reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
@@ -147,16 +144,6 @@
       backdrop-filter: blur(15px);
       border: 1px solid var(--glass-border);
     }
-    /* Add this to your CSS to ensure inputs work */
-.form-control {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.form-control:focus {
-    background: rgba(255, 255, 255, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-}
     
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -187,26 +174,24 @@
     .signup-form {
       padding: 35px 30px;
     }
-    /* Add to your CSS */
-.form-control:valid {
-    border-color: rgba(255, 255, 255, 0.3);
-}
+    
+    .form-control:valid {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
 
-.form-control:focus:valid {
-    border-color: rgba(255, 255, 255, 0.5);
-}
+    .form-control:focus:valid {
+      border-color: rgba(255, 255, 255, 0.5);
+    }
 
-/* Remove any conflicting animations */
-.form-control {
-    transition: all 0.3s ease;
-}
+    .form-control {
+      transition: all 0.3s ease;
+    }
 
-/* Ensure error messages don't disrupt layout */
-.error-message {
-    height: 20px;
-    margin-top: 5px;
-    font-size: 12px;
-}
+    .error-message {
+      height: 20px;
+      margin-top: 5px;
+      font-size: 12px;
+    }
     
     .form-row {
       display: flex;
@@ -284,6 +269,31 @@
       background: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       border: 1px solid var(--glass-border);
+    }
+    
+    .verification-code-container {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .verification-code-input {
+      width: 40px;
+      height: 50px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      border: 1.5px solid var(--glass-border);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      transition: all 0.3s;
+    }
+    
+    .verification-code-input:focus {
+      border-color: var(--accent-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3);
     }
     
     .resend-code {
@@ -511,34 +521,34 @@
     }
     
     /* Loading spinner */
-      .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 10px;
-        vertical-align: middle;
-      }
-      
-      /* Loading spinner animation */
-      .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 8px;
-        vertical-align: middle;
-      }
-      
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    /* Loading spinner animation */
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
     
     /* Email sending status */
     .email-status {
@@ -795,11 +805,28 @@
         <!-- Email Verification Section -->
         <div class="verification-section" id="verificationSection">
           <h3>Email Verification</h3>
-          <p>We've sent a verification email to <span id="verificationEmail"></span></p>
-          <p>Please check your inbox and click the verification link to complete your registration.</p>
+          <p>We've sent a verification code to <span id="verificationEmail"></span></p>
+          <p>Please enter the 8-digit code below to complete your registration.</p>
+          
+          <div class="verification-code-container">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="0">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="1">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="2">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="3">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="4">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="5">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="6">
+            <input type="text" maxlength="1" class="verification-code-input" data-index="7">
+          </div>
+          
+          <div class="error-message" id="verificationCodeError">Please enter the 8-digit verification code</div>
+          
+          <button type="button" class="signup-button" id="verifyCodeButton">
+            <span id="verifyCodeButtonText">Verify Code</span>
+          </button>
           
           <div class="resend-code">
-            Didn't receive the email? <a href="#" id="resendEmail">Resend Verification Email</a>
+            Didn't receive the code? <a href="#" id="resendCode">Resend Verification Code</a>
           </div>
         </div>
         
@@ -828,21 +855,18 @@
 <script type="module">
     // Import Firebase v9 functions
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAG-0TLa4IhUXxzdz9zECkTvNa4zAKCsvg",
-  authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
-  projectId: "nanocompany-2026-34c4f",
-  storageBucket: "nanocompany-2026-34c4f.firebasestorage.app",
-  messagingSenderId: "694553917141",
-  appId: "1:694553917141:web:e9232e87caee866438945c",
-  measurementId: "G-RSDB3MJ8HP"
-};
-
-
+    const firebaseConfig = {
+      apiKey: "AIzaSyAG-0TLa4IhUXxzdz9zECkTvNa4zAKCsvg",
+      authDomain: "nanocompany-2026-34c4f.firebaseapp.com",
+      projectId: "nanocompany-2026-34c4f",
+      storageBucket: "nanocompany-2026-34c4f.firebasestorage.app",
+      messagingSenderId: "694553917141",
+      appId: "1:694553917141:web:e9232e87caee866438945c",
+      measurementId: "G-RSDB3MJ8HP"
+    };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -863,7 +887,7 @@ const firebaseConfig = {
     const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
     const strengthMeter = document.getElementById('strengthMeter');
     const verificationEmail = document.getElementById('verificationEmail');
-    const resendEmail = document.getElementById('resendEmail');
+    const resendCode = document.getElementById('resendCode');
     const signupButtonText = document.getElementById('signupButtonText');
     const emailStatus = document.getElementById('emailStatus');
     const emailError = document.getElementById('emailError');
@@ -871,12 +895,19 @@ const firebaseConfig = {
     const confirmPasswordError = document.getElementById('confirmPasswordError');
     const termsError = document.getElementById('termsError');
     const recaptchaError = document.getElementById('recaptchaError');
+    const verificationCodeError = document.getElementById('verificationCodeError');
     const termsLink = document.getElementById('termsLink');
     const privacyLink = document.getElementById('privacyLink');
     const googleSignUp = document.getElementById('googleSignUp');
+    const verifyCodeButton = document.getElementById('verifyCodeButton');
+    const verifyCodeButtonText = document.getElementById('verifyCodeButtonText');
+    const verificationCodeInputs = document.querySelectorAll('.verification-code-input');
     
     let isSubmitting = false;
     let isRecaptchaVerified = false;
+    let generatedVerificationCode = '';
+    let userEmail = '';
+    let tempUser = null;
 
     // reCAPTCHA callback functions
     window.onRecaptchaSuccess = function() {
@@ -892,6 +923,26 @@ const firebaseConfig = {
       recaptchaError.style.display = 'block';
       checkFormValidity();
     };
+
+    // Generate 8-digit verification code
+    function generateVerificationCode() {
+      return Math.floor(10000000 + Math.random() * 90000000).toString();
+    }
+
+    // Simulate sending verification email
+    function sendVerificationEmail(email, code) {
+      console.log(`Sending verification code ${code} to ${email}`);
+      // In a real application, you would integrate with an email service like SendGrid, Mailgun, etc.
+      // For demo purposes, we'll just log the code and show it in an alert
+      alert(`For demo purposes, your verification code is: ${code}`);
+      
+      // Simulate API call delay
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true);
+        }, 1500);
+      });
+    }
 
     // Toggle password visibility
     togglePassword.addEventListener('click', function() {
@@ -1154,6 +1205,26 @@ const firebaseConfig = {
         checkFormValidity();
     });
 
+    // Verification code input handling
+    verificationCodeInputs.forEach((input, index) => {
+      input.addEventListener('input', function() {
+        // Move to next input if current input has a value
+        if (this.value.length === 1 && index < verificationCodeInputs.length - 1) {
+          verificationCodeInputs[index + 1].focus();
+        }
+        
+        // Hide error when user starts typing
+        verificationCodeError.style.display = 'none';
+      });
+      
+      input.addEventListener('keydown', function(e) {
+        // Handle backspace to move to previous input
+        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+          verificationCodeInputs[index - 1].focus();
+        }
+      });
+    });
+
     // Form submission
     signupForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1195,45 +1266,21 @@ const firebaseConfig = {
             const user = userCredential.user;
             console.log('User created:', user.uid);
             
-            // Send verification email
-            await sendEmailVerification(user);
-            console.log('Verification email sent');
+            // Store temp user for verification
+            tempUser = user;
+            userEmail = email;
             
-            // Create user document in Firestore
-            await setDoc(doc(db, 'users', user.uid), {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp(),
-                emailVerified: false,
-                profileCompleted: false,
-                accountType: "free",
-                preferences: {
-                    newsletter: true,
-                    notifications: true
-                }
-            });
-            console.log('User document created');
+            // Generate and send verification code
+            generatedVerificationCode = generateVerificationCode();
+            showEmailStatus('Sending verification code...', 'sending');
+            
+            await sendVerificationEmail(email, generatedVerificationCode);
             
             // Show success message and verification section
             verificationEmail.textContent = email;
-            showEmailStatus('Account created successfully! Please check your email for verification.', 'success');
+            showEmailStatus('Verification code sent! Please check your email.', 'success');
             verificationSection.style.display = 'block';
             verificationSection.scrollIntoView({ behavior: 'smooth' });
-            
-            // Clear form and reset UI
-            signupForm.reset();
-            if (window.grecaptcha) {
-                grecaptcha.reset();
-            }
-            isRecaptchaVerified = false;
-            strengthMeter.style.width = '0%';
-            
-            // Reset field styling
-            [firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
-                input.classList.remove('success', 'error');
-            });
             
             console.log('Account creation process completed successfully');
             
@@ -1286,19 +1333,119 @@ const firebaseConfig = {
         }
     });
 
-    // Resend verification email
-    resendEmail.addEventListener('click', async function(e) {
-        e.preventDefault();
-        const user = auth.currentUser;
-        if (user) {
+    // Verify code button
+    verifyCodeButton.addEventListener('click', async function() {
+        // Get the entered code
+        let enteredCode = '';
+        verificationCodeInputs.forEach(input => {
+            enteredCode += input.value;
+        });
+        
+        // Validate code
+        if (enteredCode.length !== 8) {
+            verificationCodeError.style.display = 'block';
+            return;
+        }
+        
+        // Check if code matches
+        if (enteredCode === generatedVerificationCode) {
+            // Code is correct - complete registration
+            verifyCodeButton.innerHTML = '<span class="loading-spinner"></span> Verifying...';
+            verifyCodeButton.disabled = true;
+            
             try {
-                await sendEmailVerification(user);
-                showEmailStatus('Verification email sent!', 'success');
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
+                const email = userEmail;
+                
+                // Create user document in Firestore
+                await setDoc(doc(db, 'users', tempUser.uid), {
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                    emailVerified: true,
+                    profileCompleted: false,
+                    accountType: "free",
+                    preferences: {
+                        newsletter: true,
+                        notifications: true
+                    }
+                });
+                console.log('User document created');
+                
+                // Show success message
+                showEmailStatus(' Account verified successfully!', 'success');
+                
+                // Clear form and reset UI
+                signupForm.reset();
+                if (window.grecaptcha) {
+                    grecaptcha.reset();
+                }
+                isRecaptchaVerified = false;
+                strengthMeter.style.width = '0%';
+                
+                // Reset field styling
+                [firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
+                    input.classList.remove('success', 'error');
+                });
+                
+                // Hide verification section after a delay
+                setTimeout(() => {
+                    verificationSection.style.display = 'none';
+                    // Redirect to login or dashboard
+                    window.location.href = 'index.html';
+                }, 2000);
+                
             } catch (error) {
-                showEmailStatus('Error sending verification email. Please try again.', 'error');
+                console.error('Error completing registration:', error);
+                showEmailStatus('Error completing registration. Please try again.', 'error');
+            } finally {
+                verifyCodeButton.innerHTML = '<span id="verifyCodeButtonText">Verify Code</span>';
+                verifyCodeButton.disabled = false;
             }
         } else {
-            showEmailStatus('No active user session. Please sign in again.', 'error');
+            // Code is incorrect
+            verificationCodeError.textContent = 'Invalid verification code. Please try again.';
+            verificationCodeError.style.display = 'block';
+            
+            // Clear inputs and focus first one
+            verificationCodeInputs.forEach(input => {
+                input.value = '';
+            });
+            verificationCodeInputs[0].focus();
+        }
+    });
+
+    // Resend verification code
+    resendCode.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (!userEmail) {
+            showEmailStatus('No email address found. Please try signing up again.', 'error');
+            return;
+        }
+        
+        try {
+            // Generate new code
+            generatedVerificationCode = generateVerificationCode();
+            showEmailStatus('Sending new verification code...', 'sending');
+            
+            await sendVerificationEmail(userEmail, generatedVerificationCode);
+            
+            showEmailStatus('New verification code sent!', 'success');
+            
+            // Clear inputs and focus first one
+            verificationCodeInputs.forEach(input => {
+                input.value = '';
+            });
+            verificationCodeInputs[0].focus();
+            verificationCodeError.style.display = 'none';
+            
+        } catch (error) {
+            console.error('Error resending code:', error);
+            showEmailStatus('Error sending verification code. Please try again.', 'error');
         }
     });
 
@@ -1352,7 +1499,7 @@ const firebaseConfig = {
                 });
                 console.log('New user document created');
                 
-                showEmailStatus('🎉 Welcome! Account created successfully!', 'success');
+                showEmailStatus(' Welcome! Account created successfully!', 'success');
             } else {
                 // Existing user - update last login
                 console.log('Updating existing user...');
@@ -1360,7 +1507,7 @@ const firebaseConfig = {
                     lastLogin: serverTimestamp()
                 }, { merge: true });
                 
-                showEmailStatus('👋 Welcome back! Signed in successfully!', 'success');
+                showEmailStatus(' Welcome back! Signed in successfully!', 'success');
             }
             
             // Redirect after successful sign-in
@@ -1410,34 +1557,6 @@ const firebaseConfig = {
     signupButton.disabled = true;
     
     console.log('Signup form initialized successfully');
-  // Debug current domain and Firebase config
-console.log('🌐 Current Domain:', window.location.hostname);
-console.log('🔧 Firebase Auth Domain:', firebaseConfig.authDomain);
-console.log('📦 Firebase Project:', firebaseConfig.projectId);
-
-// Check if domain is authorized
-function checkDomainAuthorization() {
-    const currentDomain = window.location.hostname;
-    const authDomain = firebaseConfig.authDomain;
-    
-    console.log('🔍 Domain Check:');
-    console.log(' - Current domain:', currentDomain);
-    console.log(' - Firebase auth domain:', authDomain);
-    console.log(' - Match:', authDomain.includes(currentDomain));
-    
-    if (!authDomain.includes(currentDomain) && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1') {
-        console.log('🚨 DOMAIN NOT AUTHORIZED!');
-        console.log('💡 Solution: Add', currentDomain, 'to Firebase Authorized Domains');
-    }
-}
-
-checkDomainAuthorization();
 </script>
 </body>
 </html>
-
-
-
-
-
-
