@@ -52,7 +52,6 @@
       transform-origin: 0 0;
     }
     
-    /* Custom reCAPTCHA styling */
     .grecaptcha-badge {
       visibility: hidden;
     }
@@ -75,7 +74,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('https://cdn.pixabay.com/photo/2019/09/16/11/39/neon-4480753__340.png') 
+      background: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') 
           center/cover no-repeat;
       filter: blur(8px) brightness(0.7);
       transform: scale(1.1);
@@ -128,12 +127,12 @@
       margin-bottom: 20px;
       text-rendering: optimizeLegibility;
       color: transparent;
-      background: transparent;
+      background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       text-shadow: 
-        0 0 0px rgba(255, 255, 255, 0.5),
-        0 0 0px rgba(255, 255, 255, 0.3);
+        0 0 30px rgba(255, 255, 255, 0.3),
+        0 0 60px rgba(255, 255, 255, 0.1);
     }
     
     .signup-container {
@@ -501,6 +500,7 @@
       font-size: 14px;
       margin-top: 5px;
       display: none;
+      min-height: 20px;
     }
     
     .success-message {
@@ -851,7 +851,7 @@
 <script>
     // Initialize EmailJS with your public key
     (function() {
-        emailjs.init("nNzlLkkkMXm0D7tdh"); // Replace with your actual EmailJS public key
+        emailjs.init("nNzlLkkkMXm0D7tdh");
     })();
 
     // Get DOM elements
@@ -923,8 +923,8 @@
 
             // Send email using EmailJS
             const response = await emailjs.send(
-                "service_02qp389", // Replace with your EmailJS service ID
-                "template_kzwqse5", // Replace with your EmailJS template ID
+                "service_02qp389", 
+                "template_kzwqse5", 
                 templateParams
             );
             
@@ -1200,6 +1200,9 @@
     // Verification code input handling
     verificationCodeInputs.forEach((input, index) => {
       input.addEventListener('input', function() {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
         // Move to next input if current input has a value
         if (this.value.length === 1 && index < verificationCodeInputs.length - 1) {
           verificationCodeInputs[index + 1].focus();
@@ -1213,6 +1216,25 @@
         // Handle backspace to move to previous input
         if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
           verificationCodeInputs[index - 1].focus();
+        }
+        
+        // Handle paste
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+          setTimeout(() => {
+            const pastedData = this.value;
+            if (pastedData.length > 1) {
+              // Distribute pasted code across inputs
+              const chars = pastedData.split('');
+              chars.forEach((char, charIndex) => {
+                if (index + charIndex < verificationCodeInputs.length) {
+                  verificationCodeInputs[index + charIndex].value = char.replace(/[^0-9]/g, '');
+                }
+              });
+              // Focus last filled input
+              const lastIndex = Math.min(index + chars.length - 1, verificationCodeInputs.length - 1);
+              verificationCodeInputs[lastIndex].focus();
+            }
+          }, 0);
         }
       });
     });
@@ -1265,7 +1287,11 @@
             verificationEmail.textContent = email;
             showEmailStatus('Verification code sent! Please check your email.', 'success');
             verificationSection.style.display = 'block';
-            verificationSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Scroll to verification section
+            setTimeout(() => {
+              verificationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
             
             console.log('Account creation process completed successfully');
             
@@ -1420,5 +1446,3 @@
 </script>
 </body>
 </html>
-
-
